@@ -5,12 +5,22 @@
     "theme": "dark",
     "baseline": "1600x1000 @ 100% DPI",
     "fontStack": {
-      "ui": ["Segoe UI Variable Text", "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei", "sans-serif"],
-      "mono": ["Cascadia Mono", "Consolas", "Microsoft YaHei UI", "monospace"]
+      "ui": [
+        "Segoe UI Variable Text",
+        "Segoe UI",
+        "Microsoft YaHei UI",
+        "Microsoft YaHei",
+        "sans-serif"
+      ],
+      "mono": [
+        "Cascadia Mono",
+        "Consolas",
+        "Microsoft YaHei UI",
+        "monospace"
+      ]
     },
     "notes": "所有颜色为 sRGB hex，可直接用于 Win32 COLORREF 转换（RGB(r,g,b)）或 GDI+ Color(0xFFRRGGBB)。"
   },
-
   "color": {
     "bg": {
       "bg0": "#0F1115",
@@ -89,13 +99,11 @@
       "bad": "#F0564B"
     }
   },
-
   "radius": {
     "r4": 4,
     "r6": 6,
     "r8": 8
   },
-
   "spacing": {
     "s1": 2,
     "s2": 4,
@@ -108,54 +116,133 @@
     "s9": 24,
     "s10": 32
   },
-
   "typography": {
     "ui": {
-      "caption": { "size": 10, "lineHeight": 14, "weight": 400 },
-      "micro": { "size": 10.5, "lineHeight": 15, "weight": 400 },
-      "bodySm": { "size": 11.5, "lineHeight": 16, "weight": 400 },
-      "body": { "size": 12.5, "lineHeight": 18, "weight": 400 },
-      "bodyStrong": { "size": 12.5, "lineHeight": 18, "weight": 600 },
-      "titleSm": { "size": 13, "lineHeight": 19, "weight": 600 },
-      "title": { "size": 15, "lineHeight": 22, "weight": 600 },
-      "titleLg": { "size": 16, "lineHeight": 24, "weight": 600 }
+      "caption": {
+        "size": 10,
+        "lineHeight": 14,
+        "weight": 400
+      },
+      "micro": {
+        "size": 10.5,
+        "lineHeight": 15,
+        "weight": 400
+      },
+      "bodySm": {
+        "size": 11.5,
+        "lineHeight": 16,
+        "weight": 400
+      },
+      "body": {
+        "size": 12.5,
+        "lineHeight": 18,
+        "weight": 400
+      },
+      "bodyStrong": {
+        "size": 12.5,
+        "lineHeight": 18,
+        "weight": 600
+      },
+      "titleSm": {
+        "size": 13,
+        "lineHeight": 19,
+        "weight": 600
+      },
+      "title": {
+        "size": 15,
+        "lineHeight": 22,
+        "weight": 600
+      },
+      "titleLg": {
+        "size": 16,
+        "lineHeight": 24,
+        "weight": 600
+      }
     },
     "mono": {
-      "terminal": { "size": 13, "lineHeight": 20, "weight": 400, "charWidth": 7.8 },
-      "terminalSm": { "size": 12.5, "lineHeight": 20, "weight": 400 },
-      "code": { "size": 12, "lineHeight": 19, "weight": 400 },
-      "badge": { "size": 8, "lineHeight": 8, "weight": 700, "letterSpacing": 0.3 }
+      "terminal": {
+        "size": 13,
+        "lineHeight": 20,
+        "weight": 400,
+        "charWidth": 7.8
+      },
+      "terminalSm": {
+        "size": 12.5,
+        "lineHeight": 20,
+        "weight": 400
+      },
+      "code": {
+        "size": 12,
+        "lineHeight": 19,
+        "weight": 400
+      },
+      "badge": {
+        "size": 8,
+        "lineHeight": 8,
+        "weight": 700,
+        "letterSpacing": 0.3
+      }
     }
   },
-
   "size": {
-    "window": { "width": 1600, "height": 1000 },
+    "window": {
+      "width": 1600,
+      "height": 1000
+    },
     "titlebar": 40,
-    "captionButton": { "width": 46, "height": 40 },
+    "captionButton": {
+      "width": 46,
+      "height": 40
+    },
     "sidebar": 240,
     "tabbar": 38,
-    "tab": { "height": 32, "minWidth": 0, "maxWidth": 210, "closeButton": 16 },
+    "tab": {
+      "height": 32,
+      "minWidth": 0,
+      "maxWidth": 210,
+      "closeButton": 16
+    },
     "paneHeader": 26,
     "paneHeaderQuad": 24,
     "paneDivider": 1,
     "macrobar": 44,
-    "macroButton": { "height": 28, "dot": 6, "gap": 7, "radius": 6 },
+    "macroButton": {
+      "height": 28,
+      "dot": 6,
+      "gap": 7,
+      "radius": 6
+    },
     "statusbar": 26,
     "sessionRow": 45,
     "groupRow": 27,
     "newSessionButton": 34,
     "searchBox": 32,
-    "icon": { "xs": 12, "sm": 14, "md": 16, "stroke": 1.5 },
-    "dialog": { "width": 760, "height": 584, "listWidth": 244, "header": 62, "footer": 58, "input": 32, "textarea": 80, "switch": { "width": 34, "height": 18 } }
+    "icon": {
+      "xs": 12,
+      "sm": 14,
+      "md": 16,
+      "stroke": 1.5
+    },
+    "dialog": {
+      "width": 760,
+      "height": 584,
+      "listWidth": 244,
+      "header": 62,
+      "footer": 58,
+      "input": 32,
+      "textarea": 80,
+      "switch": {
+        "width": 34,
+        "height": 18
+      }
+    }
   },
-
   "shadow": {
     "sm": "0 1px 2px rgba(0,0,0,0.45)",
     "md": "0 8px 24px rgba(0,0,0,0.45)",
     "lg": "0 18px 48px rgba(0,0,0,0.55)",
     "focusRing": "0 0 0 3px rgba(76,141,255,0.14)"
   },
-
   "motion": {
     "fast": 100,
     "base": 120,
@@ -164,17 +251,91 @@
     "easing": "cubic-bezier(0.2, 0, 0, 1)",
     "hoverFade": "background-color 100ms ease-out"
   },
-
   "layout": {
-    "scaleFactors": [1, 1.25, 1.5, 2],
+    "scaleFactors": [
+      1,
+      1.25,
+      1.5,
+      2
+    ],
     "paneColumnsAt1600": 84,
     "rowPitch": 20,
-    "quadPane": { "widthFormula": "(W - sidebar - 1) / 2", "heightFormula": "(H - titlebar - tabbar - macrobar - statusbar - 1) / 2" }
+    "quadPane": {
+      "widthFormula": "(W - sidebar - 1) / 2",
+      "heightFormula": "(H - titlebar - tabbar - macrobar - statusbar - 1) / 2"
+    }
   },
-
   "protocolColor": {
-    "ssh": { "fg": "#90B9FF", "bg": "rgba(76,141,255,0.14)", "border": "rgba(76,141,255,0.24)" },
-    "serial": { "fg": "#63E2D0", "bg": "rgba(45,212,191,0.12)", "border": "rgba(45,212,191,0.22)" },
-    "local": { "fg": "#B3A4F5", "bg": "rgba(177,140,255,0.12)", "border": "rgba(177,140,255,0.22)" }
+    "ssh": {
+      "fg": "#90B9FF",
+      "bg": "rgba(76,141,255,0.14)",
+      "border": "rgba(76,141,255,0.24)"
+    },
+    "serial": {
+      "fg": "#63E2D0",
+      "bg": "rgba(45,212,191,0.12)",
+      "border": "rgba(45,212,191,0.22)"
+    },
+    "local": {
+      "fg": "#B3A4F5",
+      "bg": "rgba(177,140,255,0.12)",
+      "border": "rgba(177,140,255,0.22)"
+    }
+  },
+  "brand": {
+    "name": "xPuTTY",
+    "icon": {
+      "ico": "shell/assets/xputty.ico",
+      "svg": "design/logo.svg",
+      "preview": "design/screenshots/logo-preview.png",
+      "generator": "design/tools/make-icon.py",
+      "sizes": [
+        16,
+        20,
+        24,
+        32,
+        40,
+        48,
+        64,
+        128,
+        256
+      ],
+      "canvas": 256,
+      "cornerRadius": 56,
+      "symbol": {
+        "chevron": "M55.04 73.28 L106.72 128 L55.04 182.72",
+        "baseline": "M134.08 182.72 H197.92",
+        "stroke": 25.84,
+        "linecap": "round",
+        "gradientAxis": [
+          37.6,
+          56.8,
+          215.2,
+          199.2
+        ]
+      },
+      "colors": {
+        "tileTop": "#12151A",
+        "tileBottom": "#1C222B",
+        "markStart": "#4C8DFF",
+        "markEnd": "#2DD4BF",
+        "innerBorder": "#313A46",
+        "borderAlpha": 0.78,
+        "sheenAlpha": 0.086
+      },
+      "smallSizePolicy": {
+        "16": "stroke 33.5 / scale 1.05 / radius 44 / no border-glow-sheen",
+        "20-24": "stroke 31.0 / scale 1.03 / radius 50 / no border-glow-sheen",
+        "32-40": "stroke 28.6 / scale 1.00 / radius 56 / 1px border @51% / glow 5.5%",
+        "48-64": "stroke 27.6 / scale 0.97 / radius 56 / 1px border @73% / glow 10% + sheen",
+        "128-256": "stroke 27.2 / scale 0.95-0.96 / radius 56 / 1px border @78% / glow 13% + sheen"
+      },
+      "titlebarMark": {
+        "tile": "linear-gradient(180deg, #5B98FF 0%, #3A76E0 100%)",
+        "glyph": "#FFFFFF",
+        "size": 22,
+        "note": "界面内 22px 品牌标记使用蓝底白字版本，与应用图标共享同一 >_ 几何"
+      }
+    }
   }
 }

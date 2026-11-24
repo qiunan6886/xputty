@@ -64,12 +64,25 @@
 
     <MediaTemplate EmbedCab="yes" />
 
-    <Condition Message="xPuTTY requires 64-bit Windows 10 or newer.">Installed OR (VersionNT64 AND VersionNT &gt;= 1000)</Condition>
+    <!--
+      Windows 10+ detection must not use VersionNT: on this build machine the
+      Windows Installer service reports VersionNT=603 / WindowsBuild=9600 even
+      on Windows 11 (verified with a plain MSI install log; the registry
+      CurrentVersion value is the legacy "6.3" too).  CurrentBuildNumber is a
+      real REG_SZ value: 10240 = first Windows 10 build, 22000+ = Windows 11.
+    -->
+    <Condition Message="xPuTTY requires 64-bit Windows 10 or newer.">Installed OR (VersionNT64 AND WINBUILD &gt;= 10240)</Condition>
+    <Property Id="WINBUILD">
+      <RegistrySearch Id="WinBuildNumber"
+                      Root="HKLM"
+                      Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion"
+                      Name="CurrentBuildNumber"
+                      Type="raw" />
+    </Property>
 
     <Icon Id="ProductIcon" SourceFile="$(var.ProductIcon)" />
     <Property Id="ARPPRODUCTICON" Value="ProductIcon" />
     <Property Id="ARPCOMMENTS" Value="xPuTTY terminal shell with a PuTTY 0.85 core" />
-    <Property Id="ARPNOMODIFY" Value="1" />
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
 
     <WixVariable Id="WixUILicenseRtf" Value="$(var.LicenseRtf)" />
@@ -84,7 +97,7 @@
              Description="xPuTTY shell, PuTTY 0.85 tools and documentation"
              Level="1"
              Display="expand"
-             AllowAbsent="no">
+             >
       <ComponentRef Id="XPuttyExe" />
       <ComponentRef Id="PuttyCore" />
 <?if $(var.Themes) = "1" ?>
@@ -161,7 +174,7 @@
             <File Id="LICENCE.TXT"
                   Name="LICENCE.txt"
                   Source="$(var.SourceDir)\LICENCE.txt" />
-            <File Id="README-PuTTY.txt"
+            <File Id="README_PuTTY.txt"
                   Name="README-PuTTY.txt"
                   Source="$(var.SourceDir)\README-PuTTY.txt" />
             <RegistryValue Root="$(var.RegRoot)"
@@ -200,7 +213,8 @@
                       WorkingDirectory="INSTALLFOLDER"
                       Icon="ProductIcon" />
             <RemoveFolder Id="RemoveApplicationProgramsFolder" On="uninstall" />
-            <RegistryValue Root="$(var.RegRoot)"
+            <!-- Per-user key path: shortcuts live in the user profile for ICE38/ICE43. -->
+            <RegistryValue Root="HKCU"
                            Key="Software\xPuTTY\Components"
                            Name="start-menu"
                            Type="integer"
@@ -221,7 +235,8 @@
                     Target="[INSTALLFOLDER]xputty.exe"
                     WorkingDirectory="INSTALLFOLDER"
                     Icon="ProductIcon" />
-          <RegistryValue Root="$(var.RegRoot)"
+          <!-- Per-user key path: the desktop shortcut lives in the user profile (ICE38/ICE43). -->
+          <RegistryValue Root="HKCU"
                          Key="Software\xPuTTY\Components"
                          Name="desktop-shortcut"
                          Type="integer"

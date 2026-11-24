@@ -14,10 +14,40 @@ namespace XPutty
     {
         public static float Scale = 1f;
 
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern uint GetDpiForWindow(IntPtr hwnd);
+
+        /// <summary>
+        /// Update Theme.Scale from a control's window DPI.
+        /// .NET Framework 4.8's Control.DeviceDpi can report 96 on a 200%
+        /// display (WinForms only fills it in when the app opts into the
+        /// WinForms per-monitor DPI mode, which we deliberately do not use
+        /// because the shell does its own scaling).  Query the window DPI
+        /// directly instead, with a Graphics fallback.
+        /// </summary>
         public static void InitFrom(Control c)
         {
-            if (c != null && c.DeviceDpi > 0)
-                Scale = c.DeviceDpi / 96f;
+            if (c == null) return;
+            float s = 0f;
+            try
+            {
+                if (c.IsHandleCreated)
+                {
+                    uint dpi = GetDpiForWindow(c.Handle);
+                    if (dpi > 0) s = dpi / 96f;
+                }
+            }
+            catch { }
+            if (s <= 0f)
+            {
+                try
+                {
+                    using (var g = Graphics.FromHwnd(c.IsHandleCreated ? c.Handle : IntPtr.Zero))
+                        s = g.DpiX / 96f;
+                }
+                catch { }
+            }
+            if (s > 0.5f) Scale = s;
         }
 
         public static int S(int logical) { return (int)Math.Round(logical * Scale); }
@@ -75,6 +105,10 @@ namespace XPutty
         public static readonly Color HoverTint = Color.FromArgb(10, 255, 255, 255);
         public static readonly Color Scrim = Color.FromArgb(158, 5, 7, 11);
         public static readonly Color CloseHover = FromHex("#C42B1C");
+        /// <summary>Hover background for list rows (sidebar sessions / dialog lists).</summary>
+        public static readonly Color HoverRow = FromHex("#171D26");
+        /// <summary>Toggle switch "off" track colour.</summary>
+        public static readonly Color ToggleOff = FromHex("#39424F");
 
         public static readonly Color[] Ansi16 = {
             FromHex("#1A1D23"), FromHex("#F07178"), FromHex("#3DD68C"), FromHex("#E8C547"),

@@ -1234,8 +1234,25 @@ static void wintw_set_raw_mouse_mode_pointer(TermWin *tw, bool activate)
 static void win_seat_connection_fatal(Seat *seat, const char *msg)
 {
     WinGuiSeat *wgs = container_of(seat, WinGuiSeat, seat);
-    char *title = dupprintf("%s Fatal Error", appname);
+    char *title;
+
     show_mouseptr(wgs, true);
+
+    /*
+     * xPuTTY managed mode: report the error to the shell so that it can
+     * render it inside the pane, instead of a system-modal message box
+     * that would be hidden behind the shell window.
+     */
+    if (xputty_notify_fatal(msg)) {
+        xputty_notify_exit(1);
+        if (conf_get_int(wgs->conf, CONF_close_on_exit) == FORCE_ON)
+            PostQuitMessage(1);
+        else
+            queue_toplevel_callback(close_session, wgs);
+        return;
+    }
+
+    title = dupprintf("%s Fatal Error", appname);
     MessageBox(wgs->term_hwnd, msg, title, MB_ICONERROR | MB_OK);
     sfree(title);
 
@@ -1252,8 +1269,14 @@ static void win_seat_connection_fatal(Seat *seat, const char *msg)
 static void win_seat_nonfatal(Seat *seat, const char *msg)
 {
     WinGuiSeat *wgs = container_of(seat, WinGuiSeat, seat);
-    char *title = dupprintf("%s Error", appname);
+    char *title;
+
     show_mouseptr(wgs, true);
+    /* xPuTTY managed mode: route the error to the shell. */
+    if (xputty_notify_fatal(msg))
+        return;
+
+    title = dupprintf("%s Error", appname);
     MessageBox(wgs->term_hwnd, msg, title, MB_ICONERROR | MB_OK);
     sfree(title);
 }

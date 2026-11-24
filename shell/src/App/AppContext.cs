@@ -259,7 +259,7 @@ namespace XPutty
 
         public void MoveMacro(string id, int newIndex)
         {
-            int old = Macros.FindIndex(m => m.Id == id);
+            int old = Macros.FindIndex(x => x.Id == id);
             if (old < 0) return;
             var m = Macros[old];
             Macros.RemoveAt(old);
@@ -351,8 +351,8 @@ namespace XPutty
                             if (k == null) continue;
                             var host = k.GetValue("HostName") as string;
                             if (string.IsNullOrEmpty(host)) continue;
-                            if (Sessions.Exists(s => string.Equals(s.Host, host,
-                                    StringComparison.OrdinalIgnoreCase) && s.Name == name))
+                            if (Sessions.Exists(x => string.Equals(x.Host, host,
+                                    StringComparison.OrdinalIgnoreCase) && x.Name == name))
                                 continue;
                             var s = new SessionDef();
                             s.Name = name;

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * xputty.c: implementation of the xPuTTY extension hooks.
  *
  * This file is part of the xPuTTY fork of PuTTY.  It implements the
@@ -488,12 +488,21 @@ void xputty_notify_exit(int exitcode)
 
 bool xputty_notify_fatal(const char *message)
 {
-    /* The shell wants fatal errors rendered inside the pane, not as a
+    /*
+     * The shell wants fatal errors rendered inside the pane, not as a
      * system-modal MessageBox that could be hidden behind the shell.
-     * Send synchronously so that the buffer stays alive. */
-    if (host_window && xputty_msg_fatal) {
-        SendMessageW(host_window, xputty_msg_fatal, 0,
-                     (LPARAM)(const char *)message);
+     *
+     * Use WM_COPYDATA rather than a pointer in a registered message: the
+     * system marshals the WM_COPYDATA buffer across process boundaries,
+     * whereas a raw pointer in lParam would be meaningless (or a security
+     * hazard) in the shell's address space.
+     */
+    if (host_window && message) {
+        COPYDATASTRUCT cds;
+        cds.dwData = (ULONG_PTR)XPUTTY_COPYDATA_FATAL;
+        cds.cbData = (DWORD)(strlen(message) + 1);
+        cds.lpData = (void *)message;
+        SendMessageW(host_window, WM_COPYDATA, 0, (LPARAM)&cds);
         return true;
     }
     return false;

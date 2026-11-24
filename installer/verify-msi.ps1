@@ -68,7 +68,7 @@ function Run-MsiExec([string]$Arguments) {
     return $p.ExitCode
 }
 
-$root = Split-Path -Parent (Split-Path -Parent $InstallerDir)
+$root = Split-Path -Parent $InstallerDir
 if (-not $WixDir) { $WixDir = Join-Path $root 'tools\wix' }
 $candle = Join-Path $WixDir 'candle.exe'
 $light = Join-Path $WixDir 'light.exe'
@@ -99,9 +99,11 @@ if ($adminExit -ne 0) {
 
     # Files in the administrative image keep their install tree below the
     # TARGETDIR (\xPuTTY\...).  Map every staged file by its relative path.
+    # xputty.ico is a resource (ARPPRODUCTICON/shortcut icon) embedded in the
+    # Icon table, not a payload file, so it is not expected in the image.
     $stagedFiles = Get-ChildItem -LiteralPath $StageDir -Recurse -File | ForEach-Object {
         $_.FullName.Substring($StageDir.Length + 1)
-    }
+    } | Where-Object { $_ -ne 'xputty.ico' }
     $extracted = Get-ChildItem -LiteralPath $adminDir -Recurse -File
     foreach ($rel in $stagedFiles) {
         $base = Split-Path -Leaf $rel

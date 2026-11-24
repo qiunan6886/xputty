@@ -20,8 +20,9 @@
 
 #include "putty.h"
 
-/* Magic value accepted in the dwData field of an injected WM_COPYDATA. */
-#define XPUTTY_COPYDATA_MAGIC 0x58505459u /* 'XPTY' */
+/* Magic values accepted in the dwData field of a WM_COPYDATA message. */
+#define XPUTTY_COPYDATA_MAGIC 0x58505459u /* 'XPTY' - shell -> terminal input */
+#define XPUTTY_COPYDATA_FATAL 0x58505446u /* 'XPTF' - terminal -> shell error */
 
 /* Flags in the 4-byte little-endian header of an injected payload. */
 #define XPUTTY_INPUT_APPEND_CR 0x00000001u

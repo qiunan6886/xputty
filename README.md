@@ -8,9 +8,14 @@ Windows 10/11 专用的 SSH / 串口终端管理器：**基于 PuTTY 0.85 源码
 
 交付形式：**MSI 安装包**（x64，Program Files 安装，开始菜单 + 桌面快捷方式）。
 
-![主界面](design/screenshots/main.png)
-![宏管理](design/screenshots/macro-dialog.png)
-![四窗格](design/screenshots/quad-pane.png)
+**实际运行截图**（Windows 11 / 200% DPI）：
+
+![主界面](docs/screenshots/01-main-single.png)
+![2x2 四窗格](docs/screenshots/02-quad-pane.png)
+![宏管理](docs/screenshots/06-macro-manager.png)
+![断开重连](docs/screenshots/05-disconnect-overlay.png)
+
+更多截图见 `docs/screenshots/`：单窗格、四窗格、三窗格、F11 最大化、宏管理、会话编辑、串口配置、设置。
 
 ## 功能
 

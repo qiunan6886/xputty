@@ -32,6 +32,7 @@ namespace XPutty
         public static readonly Color DashedBorder = Theme.Blend(Theme.Border, Theme.Accent, 0.2f);
         public static readonly Color DashedText = Theme.Blend(Theme.Accent, Color.White, 0.35f);
         public static readonly Color KeyCapBorder = Theme.Blend(Theme.Border, Theme.TextSecondary, 0.25f);
+        public static readonly Color InputBorderColor = Theme.Blend(Theme.Border, Theme.TextTertiary, 0.15f);
         public static readonly Color ToggleOff = Theme.Blend(Theme.Bg3, Theme.TextTertiary, 0.35f);
         public static readonly Color HeaderDivider = Theme.Border;
         public static readonly Color MacroBtnBg = Theme.Bg2;
@@ -111,6 +112,25 @@ namespace XPutty
             if (string.IsNullOrEmpty(s)) return 0;
             return TextRenderer.MeasureText(s, f, Size.Empty,
                 TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix).Width;
+        }
+
+        /// <summary>
+        /// GDI+ text draw that honours Graphics.SetClip().  TextRenderer is a
+        /// GDI call and ignores a GDI+ clip region, so callers that clip their
+        /// painting (e.g. the horizontally scrolling macro strip) must use this
+        /// for the partially visible parts.
+        /// </summary>
+        public static void TextClip(Graphics g, string s, Font f, Color c, Rectangle r)
+        {
+            if (string.IsNullOrEmpty(s) || r.Width <= 0) return;
+            using (var sf = new StringFormat(StringFormatFlags.NoWrap))
+            {
+                sf.Alignment = StringAlignment.Near;
+                sf.LineAlignment = StringAlignment.Center;
+                sf.Trimming = StringTrimming.EllipsisCharacter;
+                using (var b = new SolidBrush(c))
+                    g.DrawString(s, f, b, r, sf);
+            }
         }
 
         public static int TextHeight(Font f)
@@ -211,6 +231,24 @@ namespace XPutty
             float w = Math.Max(1f, Theme.SF(1.5f));
             switch (kind)
             {
+                case "check":
+                    Check(g, new Rectangle(r.X + Theme.S(2), r.Y + Theme.S(2),
+                        r.Width - Theme.S(4), r.Height - Theme.S(4)), c);
+                    return;
+                case "refresh":
+                    using (var pen = new Pen(c, w))
+                    {
+                        pen.StartCap = LineCap.Round;
+                        var rr = new Rectangle(r.X + 2, r.Y + 2, r.Width - 4, r.Height - 4);
+                        g.DrawArc(pen, rr, -50f, 285f);
+                        int ax = rr.X + rr.Width - Theme.S(1);
+                        int ay = rr.Y + Theme.S(3);
+                        g.DrawLines(pen, new[] {
+                            new Point(ax - Theme.S(4), ay + Theme.S(1)),
+                            new Point(ax, ay - Theme.S(2)),
+                            new Point(ax + Theme.S(1), ay + Theme.S(3)) });
+                    }
+                    return;
                 case "bulb":
                     using (var pen = new Pen(c, w))
                     {
@@ -222,17 +260,27 @@ namespace XPutty
                     }
                     return;
                 case "keyboard":
-                    using (var pen = new Pen(c, w))
+                    using (var pen = new Pen(c, Math.Max(1f, Theme.SF(1.3f))))
                     {
                         pen.StartCap = LineCap.Round; pen.EndCap = LineCap.Round;
-                        var rr = new Rectangle(r.X + 1, r.Y + Theme.S(3), r.Width - 2, r.Height - Theme.S(6));
-                        Theme.DrawRound(g, rr, Theme.S(2), c, w);
-                        for (int i = 0; i < 3; i++)
+                        var rr = new Rectangle(r.X + 1, r.Y + Theme.S(3),
+                            r.Width - 2, r.Height - Theme.S(6));
+                        Theme.DrawRound(g, rr, Theme.S(2), c, Math.Max(1f, Theme.SF(1.3f)));
+                        using (var b = new SolidBrush(c))
                         {
-                            int dx = rr.X + Theme.S(3) + i * Theme.S(4);
-                            g.DrawLine(pen, dx, rr.Y + Theme.S(3), dx, rr.Y + Theme.S(3));
+                            int dot = Math.Max(1, Theme.S(1));
+                            for (int row = 0; row < 2; row++)
+                            {
+                                for (int col = 0; col < 3; col++)
+                                {
+                                    int dx = rr.X + Theme.S(3) + col * Theme.S(4);
+                                    int dy = rr.Y + Theme.S(2) + row * Theme.S(3);
+                                    g.FillRectangle(b, dx, dy, dot * 2, dot);
+                                }
+                            }
+                            g.FillRectangle(b, rr.X + Theme.S(4), rr.Bottom - Theme.S(3),
+                                rr.Width - Theme.S(8), dot);
                         }
-                        g.DrawLine(pen, rr.X + Theme.S(4), rr.Bottom - Theme.S(3), rr.Right - Theme.S(4), rr.Bottom - Theme.S(3));
                     }
                     return;
                 case "grip":
@@ -276,6 +324,21 @@ namespace XPutty
                             new Point(rr.X + Theme.S(7), rr.Y + rr.Height / 2),
                             new Point(rr.X + Theme.S(4), rr.Bottom - Theme.S(4)) });
                         g.DrawLine(pen, rr.X + Theme.S(9), rr.Bottom - Theme.S(4), rr.Right - Theme.S(4), rr.Bottom - Theme.S(4));
+                    }
+                    return;
+                case "plug":
+                    using (var pen = new Pen(c, w))
+                    {
+                        pen.StartCap = LineCap.Round; pen.EndCap = LineCap.Round;
+                        int cx = r.X + r.Width / 2;
+                        // two prongs
+                        g.DrawLine(pen, cx - Theme.S(3), r.Y + Theme.S(2), cx - Theme.S(3), r.Y + Theme.S(5));
+                        g.DrawLine(pen, cx + Theme.S(3), r.Y + Theme.S(2), cx + Theme.S(3), r.Y + Theme.S(5));
+                        // body
+                        Theme.DrawRound(g, new Rectangle(cx - Theme.S(5), r.Y + Theme.S(5),
+                            Theme.S(10), Theme.S(6)), Theme.S(2), c, w);
+                        // cable
+                        g.DrawLine(pen, cx, r.Y + Theme.S(11), cx, r.Bottom - Theme.S(2));
                     }
                     return;
                 case "sliders":

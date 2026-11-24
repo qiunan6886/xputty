@@ -69,7 +69,8 @@ param(
     [switch]$SkipPutty,
     [switch]$SkipShell,
     [switch]$Fresh,
-    [switch]$Verify
+    [switch]$Verify,
+    [switch]$AllowPlaceholder
 )
 
 $ErrorActionPreference = 'Stop'
@@ -100,6 +101,24 @@ function Format-Elapsed($ts) {
     return ([math]::Round(((Get-Date) - $ts).TotalSeconds, 1).ToString() + ' s')
 }
 
+# Newest modification time across the shell sources (cs files, manifest, icon).
+function Get-ShellSourceNewestTime {
+    $newest = [datetime]::MinValue
+    $srcDir = Join-Path $Root 'shell\src'
+    if (Test-Path -LiteralPath $srcDir) {
+        Get-ChildItem -LiteralPath $srcDir -Recurse -File | ForEach-Object {
+            if ($_.LastWriteTime -gt $newest) { $newest = $_.LastWriteTime }
+        }
+    }
+    foreach ($extra in @((Join-Path $Root 'shell\app.manifest'), (Join-Path $Root 'shell\assets\xputty.ico'))) {
+        if (Test-Path -LiteralPath $extra) {
+            $m = (Get-Item -LiteralPath $extra).LastWriteTime
+            if ($m -gt $newest) { $newest = $m }
+        }
+    }
+    return $newest
+}
+
 # ------------------------------------------------------------- defaults
 if (-not $PuttySourceDir) { $PuttySourceDir = Join-Path $Root 'putty' }
 if (-not $PuttyBuildDir)  { $PuttyBuildDir  = Join-Path $Root 'build\putty-fork' }
@@ -114,8 +133,9 @@ $licenseRtf   = Join-Path $installerDir 'license.rtf'
 $wixOutDir    = Join-Path $Root 'build\wix-out'
 $candleExe    = Join-Path $WixDir 'candle.exe'
 $lightExe     = Join-Path $WixDir 'light.exe'
-$msiPath      = Join-Path $DistDir ('xPuTTY-' + $Version + '-x64.msi')
 $sumsPath     = Join-Path $DistDir 'SHA256SUMS.txt'
+$buildInfoPath = Join-Path $DistDir 'BUILD-INFO.txt'
+$placeholderWarningPath = Join-Path $DistDir 'PLACEHOLDER-BUILD-WARNING.txt'
 
 $puttyTargets = @('putty', 'plink', 'pscp', 'psftp', 'puttygen', 'pageant')
 
@@ -156,6 +176,17 @@ if (-not $SkipPutty) {
     Write-Ok ('PuTTY fork build finished in ' + (Format-Elapsed $t) + '  (' + ($puttyTimings -join ', ') + ')')
 } else {
     Write-Step '1/6 Building PuTTY fork: SKIPPED (-SkipPutty)'
+    # Safety net: warn (loudly) if the fork sources changed after the last build.
+    $forkNewest = Get-ChildItem -LiteralPath $PuttySourceDir -Recurse -File |
+                  Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    $forkExe = Join-Path $PuttyBuildDir 'putty.exe'
+    if ((Test-Path -LiteralPath $forkExe) -and $null -ne $forkNewest) {
+        $forkExeTime = (Get-Item -LiteralPath $forkExe).LastWriteTime
+        if ($forkNewest.LastWriteTime -gt $forkExeTime) {
+            Write-Warn ('-SkipPutty: fork sources are NEWER than ' + $forkExe + ' (source: ' + $forkNewest.LastWriteTime +
+                        ', binary: ' + $forkExeTime + '). You are reusing stale binaries - drop -SkipPutty to rebuild.')
+        }
+    }
 }
 
 $puttyBins = @{}
@@ -176,40 +207,99 @@ Write-Ok ('all ' + $puttyTargets.Count + ' PuTTY binaries present (putty.exe, pl
 
 # --------------------------------------------------------- 2. shell build
 Write-Step '2/6 Building WinForms shell (xputty.exe)'
+$shellDefault = Join-Path $Root 'build\shell\xputty.exe'
 $shellPath = ''
+$shellIsPlaceholder = $false
+
 if ($ShellExe) {
     $shellPath = $ShellExe
     Write-Warn ('using externally supplied shell binary: ' + $shellPath)
-} elseif ($SkipShell) {
-    $shellPath = Join-Path $Root 'build\shell\xputty.exe'
-    Write-Host ('  -SkipShell: reusing ' + $shellPath)
 } else {
-    if (-not (Test-Path -LiteralPath $ShellScript)) {
-        Fail ('Shell build script not found: ' + $ShellScript +
-              '. The shell may still be in development - use -SkipShell -ShellExe <path> to test the pipeline with a placeholder.')
+    if ($SkipShell) {
+        Write-Host ('  -SkipShell: reusing ' + $shellDefault)
+    } else {
+        if (-not (Test-Path -LiteralPath $ShellScript)) {
+            Fail ('Shell build script not found: ' + $ShellScript +
+                  '. The WinForms shell is still in development; use -AllowPlaceholder to validate the pipeline.')
+        }
+        Write-Host ('  running: ' + $ShellScript)
+        $t = Get-Date
+        $shellOutput = & powershell -NoProfile -ExecutionPolicy Bypass -File $ShellScript 2>&1
+        $shellExit = $LASTEXITCODE
+        $shellOutput | ForEach-Object { Write-Host ('  | ' + $_) }
+        if ($shellExit -eq 0) {
+            Write-Ok ('shell built in ' + (Format-Elapsed $t) + ': ' + $shellDefault)
+        } else {
+            # A running xputty.exe locks the output file (csc error CS2012). If the
+            # existing binary is at least as new as the sources, reuse it instead
+            # of failing: the binary is a genuine build, just currently in use by
+            # the developer's test session.
+            $fallbackOk = $false
+            if (Test-Path -LiteralPath $shellDefault) {
+                $fallbackOk = ((Get-Item -LiteralPath $shellDefault).LastWriteTime -ge (Get-ShellSourceNewestTime))
+            }
+            if ($fallbackOk) {
+                Write-Warn ('shell build failed (exit ' + $shellExit + ') but the existing build\shell\xputty.exe is newer than ' +
+                            'the shell sources (likely because a running xputty.exe locks the file); reusing it')
+            } elseif (-not $AllowPlaceholder) {
+                Fail ('shell build failed (exit ' + $shellExit + '). The WinForms shell is not ready (or its output is ' +
+                      'locked by a running xputty.exe). Re-run when dev produces build\shell\xputty.exe, or pass ' +
+                      '-AllowPlaceholder to validate the pipeline with a putty.exe placeholder (such an MSI is clearly ' +
+                      'marked and must not be shipped).')
+            } else {
+                Write-Warn ('shell build failed (exit ' + $shellExit + '); continuing because -AllowPlaceholder was given')
+            }
+        }
     }
-    Write-Host ('  running: ' + $ShellScript)
-    $t = Get-Date
-    $shellOutput = & powershell -NoProfile -ExecutionPolicy Bypass -File $ShellScript 2>&1
-    $shellExit = $LASTEXITCODE
-    $shellOutput | ForEach-Object { Write-Host ('  | ' + $_) }
-    if ($shellExit -ne 0) {
-        Fail ('shell build failed (exit ' + $shellExit + '). If the shell is still in development, ' +
-              'use -SkipShell -ShellExe <existing xputty.exe> (a placeholder is acceptable for pipeline validation).')
+    $shellPath = $shellDefault
+}
+
+$placeholderSource = Join-Path $Root 'build\_placeholder\xputty.exe'
+
+if ($shellPath -and (Test-Path -LiteralPath $shellPath)) {
+    $shellHash = (Get-FileHash -LiteralPath $shellPath -Algorithm SHA256).Hash
+    $puttyHash = (Get-FileHash -LiteralPath $puttyBins['putty'] -Algorithm SHA256).Hash
+    if ($shellHash -eq $puttyHash) { $shellIsPlaceholder = $true }
+
+    # Freshness check: the binary must not be older than the shell sources.
+    # Skipped for explicit -ShellExe overrides (deliberate external binary).
+    if (-not $ShellExe -and -not $shellIsPlaceholder) {
+        $newestSource = Get-ShellSourceNewestTime
+        $shellMtime = (Get-Item -LiteralPath $shellPath).LastWriteTime
+        if ($newestSource -gt $shellMtime) {
+            if (-not $AllowPlaceholder) {
+                Fail ('build\shell\xputty.exe is OLDER than the shell sources (exe: ' + $shellMtime +
+                      ', newest source: ' + $newestSource + '). Run shell\build-shell.ps1, or pass ' +
+                      '-AllowPlaceholder to accept this binary for pipeline validation only.')
+            }
+            Write-Warn ('shell binary is older than the shell sources (exe: ' + $shellMtime + ', newest source: ' + $newestSource + ')')
+        }
     }
-    $shellPath = Join-Path $Root 'build\shell\xputty.exe'
-    Write-Ok ('shell built in ' + (Format-Elapsed $t) + ': ' + $shellPath)
+} else {
+    if (-not $AllowPlaceholder) {
+        Fail ('Shell executable missing: ' + $shellPath + '. The WinForms shell is still in development. ' +
+              'Run shell\build-shell.ps1 once it is ready, or pass -AllowPlaceholder to validate the pipeline ' +
+              'with a putty.exe placeholder (never ship that MSI).')
+    }
+    New-Item -ItemType Directory -Path (Split-Path -Parent $placeholderSource) -Force | Out-Null
+    Copy-Item -LiteralPath $puttyBins['putty'] -Destination $placeholderSource -Force
+    $shellPath = $placeholderSource
+    $shellIsPlaceholder = $true
+    Write-Warn 'Shell missing: using putty.exe as a PLACEHOLDER xputty.exe (pipeline validation only)'
 }
-if (-not (Test-Path -LiteralPath $shellPath)) {
-    Fail ('Shell executable not found: ' + $shellPath +
-          '. Build it with shell\build-shell.ps1, or pass -SkipShell -ShellExe <path>.')
+
+if ($shellIsPlaceholder -and -not $AllowPlaceholder) {
+    Fail ('build\shell\xputty.exe is byte-identical to putty.exe (placeholder). Refusing to build a release MSI - ' +
+          'wait for the real shell, or pass -AllowPlaceholder for a clearly marked pipeline-validation MSI.')
 }
-$shellHash = (Get-FileHash -LiteralPath $shellPath -Algorithm SHA256).Hash
-$puttyHash = (Get-FileHash -LiteralPath $puttyBins['putty'] -Algorithm SHA256).Hash
-if ($shellHash -eq $puttyHash) {
-    Write-Warn 'xputty.exe is byte-identical to putty.exe (placeholder shell): MSI is only a pipeline/install test, rebuild when the real shell exists'
-}
-Write-Ok ('shell: ' + $shellPath + '  (' + (Get-Item -LiteralPath $shellPath).Length + ' bytes)')
+
+$msiSuffix = ''
+if ($shellIsPlaceholder) { $msiSuffix = '-PLACEHOLDER' }
+$msiPath = Join-Path $DistDir ('xPuTTY-' + $Version + '-x64' + $msiSuffix + '.msi')
+
+$shellLabel = ''
+if ($shellIsPlaceholder) { $shellLabel = '  [PLACEHOLDER - NOT FOR RELEASE]' }
+Write-Ok ('shell: ' + $shellPath + '  (' + (Get-Item -LiteralPath $shellPath).Length + ' bytes)' + $shellLabel)
 
 # ------------------------------------------------------- 3. stage assembly
 Write-Step '3/6 Assembling staging directory'
@@ -254,10 +344,11 @@ if ($iconSrc -like '*shell\assets\xputty.ico') {
 }
 $staged += 'xputty.ico'
 
-# Optional themes\default.ini
+# Optional themes\default.ini (installer/assets is the repo default; shell dirs win if present)
 $themeCandidates = @(
     (Join-Path $Root 'shell\assets\themes\default.ini'),
     (Join-Path $Root 'shell\themes\default.ini'),
+    (Join-Path $Root 'installer\assets\themes\default.ini'),
     (Join-Path $Root 'themes\default.ini')
 )
 $themeSrc = $themeCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
@@ -326,6 +417,81 @@ Write-Host ('  ' + ('-' * 78))
 Write-Host ('  {0,-24} {1,12}  {2}' -f $msiItem.File, $msiItem.Bytes, $msiItem.Sha256) -ForegroundColor Green
 Write-Ok ('manifest written: ' + $sumsPath)
 
+# ------------------------------------------- 5b. build info / placeholder markers
+# The real build removes any stale placeholder artifacts; a placeholder build
+# leaves an explicit warning file + a *-PLACEHOLDER.msi name so it can never be
+# mistaken for a shippable release.
+Get-ChildItem -LiteralPath $DistDir -Filter 'xPuTTY-*-PLACEHOLDER.msi' -File -ErrorAction SilentlyContinue | ForEach-Object {
+    if ($_.FullName -ne $msiPath) { Remove-Item -LiteralPath $_.FullName -Force }
+}
+if ($shellIsPlaceholder) {
+    $warnText = @(
+        'xPuTTY PLACEHOLDER BUILD - NOT FOR RELEASE',
+        '==========================================',
+        '',
+        'This MSI was built with -AllowPlaceholder because build\shell\xputty.exe',
+        '(the WinForms shell) does not exist yet or is not newer than the shell sources.',
+        'xputty.exe inside this MSI is a copy of putty.exe and only proves that the',
+        'build/install pipeline works.',
+        '',
+        'Do not distribute this MSI. Once the shell is built by dev',
+        '(shell\build-shell.ps1 -> build\shell\xputty.exe), run:',
+        '    powershell -NoProfile -ExecutionPolicy Bypass -File D:\workspace\xputty\build-all.ps1 -Verify',
+        'and the real dist\xPuTTY-<version>-x64.msi will be produced instead.',
+        '',
+        ('Generated: ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')),
+        ('MSI: ' + $msiPath)
+    )
+    [System.IO.File]::WriteAllLines($placeholderWarningPath, $warnText, (New-Object System.Text.UTF8Encoding($false)))
+    Write-Warn ('PLACEHOLDER build: wrote ' + $placeholderWarningPath)
+} else {
+    if (Test-Path -LiteralPath $placeholderWarningPath) { Remove-Item -LiteralPath $placeholderWarningPath -Force }
+}
+
+# BUILD-INFO.txt: one place to see versions, hashes and what went into the MSI
+$commitId = 'unknown'
+$commitFile = Join-Path $PuttyBuildDir 'CMakeFiles\cmake_commit.c'
+if (Test-Path -LiteralPath $commitFile) {
+    $cm = [regex]::Match([System.IO.File]::ReadAllText($commitFile), 'commitid\[\] = "([0-9a-f]+)"')
+    if ($cm.Success) { $commitId = $cm.Groups[1].Value }
+}
+$shellSha = (Get-FileHash -LiteralPath $shellPath -Algorithm SHA256).Hash
+$info = @()
+$info += 'xPuTTY build info'
+$info += '================'
+$info += ('Built at      : ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss'))
+$info += ('Version       : ' + $Version)
+$info += ('Config        : ' + $Config)
+$info += ('MSI           : ' + (Split-Path -Leaf $msiPath))
+$info += ('MSI SHA256    : ' + $msiHash)
+$info += ('MSI size      : ' + $msiSize + ' bytes')
+$info += ('Placeholder   : ' + $shellIsPlaceholder)
+$info += ('Shell         : ' + $shellPath)
+$info += ('Shell SHA256  : ' + $shellSha)
+$info += ('PuTTY fork    : ' + $PuttySourceDir)
+$info += ('PuTTY build   : ' + $PuttyBuildDir)
+$info += ('PuTTY commit  : ' + $commitId)
+# Fingerprint of the xPuTTY-specific fork files, so a frozen source state can be
+# reproduced/verified later (the pristine PuTTY part is pinned by $commitId).
+$info += 'Fork sources  :'
+foreach ($rel in @('windows\window.c', 'windows\xputty.c', 'windows\xputty.h', 'windows\putty.c', 'windows\CMakeLists.txt')) {
+    $p = Join-Path $PuttySourceDir $rel
+    if (Test-Path -LiteralPath $p) {
+        $info += ('  ' + (Get-FileHash -LiteralPath $p -Algorithm SHA256).Hash + '  ' + $rel)
+    }
+}
+if (Test-Path -LiteralPath (Join-Path $Root 'shell\src')) {
+    $shellNewest = Get-ChildItem -LiteralPath (Join-Path $Root 'shell\src') -Recurse -File |
+                   Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    $info += ('Shell newest  : ' + $shellNewest.LastWriteTime + '  ' + $shellNewest.Name)
+}
+if ($puttyTimings.Count -gt 0) { $info += ('PuTTY timings : ' + ($puttyTimings -join ', ')) }
+$info += ('Staged files  : ' + $staged.Count)
+foreach ($m in $manifest) { $info += ('  ' + $m.Sha256 + '  ' + $m.File) }
+$info += ('  ' + $msiHash + '  ' + (Split-Path -Leaf $msiPath))
+[System.IO.File]::WriteAllLines($buildInfoPath, $info, (New-Object System.Text.UTF8Encoding($false)))
+Write-Ok ('build info written: ' + $buildInfoPath)
+
 # ----------------------------------------------------------- 6. verify
 if ($Verify) {
     Write-Step '6/6 Verifying MSI'
@@ -346,7 +512,12 @@ Write-Host ('  Size       : ' + $msiSize + ' bytes')
 Write-Host ('  SHA256     : ' + $msiHash)
 Write-Host ('  Manifest   : ' + $sumsPath)
 Write-Host ('  Stage dir  : ' + $StageDir)
+Write-Host ('  Shell      : ' + $shellPath)
+Write-Host ('  Build info : ' + $buildInfoPath)
 if ($puttyTimings.Count -gt 0) { Write-Host ('  PuTTY      : ' + ($puttyTimings -join ', ')) }
 $totalSeconds = ((Get-Date) - $totalStart).TotalSeconds
 Write-Host ('  Total time : ' + (Format-Seconds $totalSeconds))
+if ($shellIsPlaceholder) {
+    Write-Warn 'THIS IS A PLACEHOLDER BUILD (xputty.exe = putty.exe). Not for release.'
+}
 exit 0
