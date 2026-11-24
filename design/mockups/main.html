@@ -1,0 +1,432 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>xPuTTY — 主窗口</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></symbol>
+  <symbol id="i-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.2"/><path d="M10.2 10.2 13.5 13.5"/></symbol>
+  <symbol id="i-chev-down" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></symbol>
+  <symbol id="i-chev-right" viewBox="0 0 16 16"><path d="M6 4l4 4-4 4"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 16 16"><path d="M2 4.5a1 1 0 0 1 1-1h3l1.3 1.6H13a1 1 0 0 1 1 1v6.4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-server" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="4" rx="1"/><rect x="2" y="9" width="12" height="4" rx="1"/><circle cx="4.6" cy="5" r=".75" fill="currentColor" stroke="none"/><circle cx="4.6" cy="11" r=".75" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-plug" viewBox="0 0 16 16"><path d="M5.5 2.5v3M10.5 2.5v3M3.5 5.5h9v1.8a4.5 4.5 0 0 1-9 0z"/><path d="M8 11.8V14"/></symbol>
+  <symbol id="i-terminal" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M4.5 6.4 6.7 8.3 4.5 10.2M8.6 10.4h2.9"/></symbol>
+  <symbol id="i-close" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></symbol>
+  <symbol id="i-min" viewBox="0 0 16 16"><path d="M3 8h10"/></symbol>
+  <symbol id="i-win-max" viewBox="0 0 16 16"><rect x="3.5" y="3.5" width="9" height="9" rx=".6"/></symbol>
+  <symbol id="i-split-v" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M8 3v10"/></symbol>
+  <symbol id="i-split-h" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M2 8h12"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M8 3v10M2 8h12"/></symbol>
+  <symbol id="i-single" viewBox="0 0 16 16"><rect x="2.5" y="3.5" width="11" height="9" rx="1.5"/></symbol>
+  <symbol id="i-maximize" viewBox="0 0 16 16"><path d="M3 6.5V3h3.5M13 9.5V13H9.5M10 3h3v3.5M6 13H3V9.5"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 16 16"><path d="M2.5 4.6h11M2.5 8h11M2.5 11.4h11"/><g fill="#12151a" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="4.6" r="1.5"/><circle cx="10.2" cy="8" r="1.5"/><circle cx="5.2" cy="11.4" r="1.5"/></g></symbol>
+  <symbol id="i-help" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.6"/><path d="M6.4 6.2a1.7 1.7 0 1 1 2.6 1.5c-.6.4-1 .8-1 1.5M8 11.7v.1"/></symbol>
+  <symbol id="i-key" viewBox="0 0 16 16"><circle cx="5.2" cy="10.8" r="2.4"/><path d="M6.9 9.1 12.4 3.6M10.2 5.8l1.5 1.5M11.4 4.6l1.5 1.5"/></symbol>
+  <symbol id="i-scan" viewBox="0 0 16 16"><path d="M2.5 5.5V3h2.6M10.9 3h2.6v2.5M13.5 10.5V13h-2.6M5.1 13H2.5v-2.5M5.6 8h4.8"/></symbol>
+  <symbol id="i-import" viewBox="0 0 16 16"><path d="M8 2.5v7M5.2 6.8 8 9.6l2.8-2.8M2.5 12.5h11"/></symbol>
+  <symbol id="i-bulb" viewBox="0 0 16 16"><path d="M6 11.4h4M6.6 13.4h2.8M8 2.2a4 4 0 0 1 2.4 7.2c-.4.3-.6.7-.6 1H6.2c0-.3-.2-.7-.6-1A4 4 0 0 1 8 2.2z"/></symbol>
+  <symbol id="i-arrow-right" viewBox="0 0 16 16"><path d="M3 8h10M9.5 4.5 13 8l-3.5 3.5"/></symbol>
+  <symbol id="i-drag" viewBox="0 0 16 16"><g fill="currentColor" stroke="none"><circle cx="6" cy="5" r=".85"/><circle cx="10" cy="5" r=".85"/><circle cx="6" cy="8" r=".85"/><circle cx="10" cy="8" r=".85"/><circle cx="6" cy="11" r=".85"/><circle cx="10" cy="11" r=".85"/></g></symbol>
+  <symbol id="i-trash" viewBox="0 0 16 16"><path d="M3 4.8h10M6.2 4.8V3.2h3.6v1.6M4.4 4.8l.7 8.2h5.8l.7-8.2M6.6 7.2v3.8M9.4 7.2v3.8"/></symbol>
+  <symbol id="i-check" viewBox="0 0 16 16"><path d="M3.2 8.4 6.2 11.4 12.8 4.8"/></symbol>
+  <symbol id="i-record" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.6"/><circle cx="8" cy="8" r="2.6" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-palette" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.6"/><g fill="currentColor" stroke="none"><circle cx="5.8" cy="6.2" r=".75"/><circle cx="9.6" cy="5.6" r=".75"/><circle cx="10.4" cy="9.2" r=".75"/></g></symbol>
+  <symbol id="i-info" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.6"/><path d="M8 7.2v3.9M8 5.1v.1"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 16 16"><rect x="3.5" y="7" width="9" height="6" rx="1.2"/><path d="M5.8 7V5.2a2.2 2.2 0 0 1 4.4 0V7"/></symbol>
+  <symbol id="i-keyboard" viewBox="0 0 16 16"><rect x="2" y="4.5" width="12" height="7" rx="1.2"/><path d="M4.4 6.9h.1M6.8 6.9h.1M9.2 6.9h.1M11.6 6.9h.1M5 9.1h2M8.8 9.1h2.2"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 16 16"><path d="M8 2.4 14 5.6 8 8.8 2 5.6z"/><path d="M2 8.6l6 3.2 6-3.2"/></symbol>
+  <symbol id="i-more" viewBox="0 0 16 16"><g fill="currentColor" stroke="none"><circle cx="4" cy="8" r="1"/><circle cx="8" cy="8" r="1"/><circle cx="12" cy="8" r="1"/></g></symbol>
+</defs></svg>
+
+<div class="app">
+
+  <!-- ================= 标题栏 ================= -->
+  <div class="titlebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 4.4 6.6 8l-3.4 3.6M8.4 11.6h4.2"/></svg>
+      </div>
+      <span class="brand-name">xPuTTY</span>
+      <span class="brand-ver">v0.85.1</span>
+    </div>
+    <div class="titlebar-sep"></div>
+    <div class="titlebar-title">
+      <span class="dot"></span>
+      <b>生产环境</b>
+      <span>4 个会话 · 2 个窗格</span>
+    </div>
+    <div class="titlebar-drag"></div>
+    <button class="tb-btn" title="命令面板"><svg class="icon sm"><use href="#i-search"/></svg></button>
+    <button class="tb-btn" title="设置"><svg class="icon sm"><use href="#i-gear"/></svg></button>
+    <div class="titlebar-sep" style="margin-right:6px"></div>
+    <div class="win-controls">
+      <button class="win-btn" title="最小化"><svg class="icon sm"><use href="#i-min"/></svg></button>
+      <button class="win-btn" title="最大化"><svg class="icon sm"><use href="#i-win-max"/></svg></button>
+      <button class="win-btn close" title="关闭"><svg class="icon sm"><use href="#i-close"/></svg></button>
+    </div>
+  </div>
+
+  <!-- ================= 工作区 ================= -->
+  <div class="workspace">
+
+    <!-- ---------- 会话侧栏 240px ---------- -->
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <button class="btn-new">
+          <svg class="icon sm"><use href="#i-plus"/></svg>
+          新建会话
+          <span class="kbd-hint">Ctrl N</span>
+        </button>
+        <div class="search">
+          <svg class="icon sm"><use href="#i-search"/></svg>
+          <span class="search-text">搜索会话或主机</span>
+          <span class="kbd-hint">Ctrl K</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">会话
+        <span class="count">11 / 12</span>
+      </div>
+
+      <div class="tree">
+        <!-- 生产环境 -->
+        <div class="group">
+          <div class="group-hd">
+            <svg class="icon xs"><use href="#i-chev-down"/></svg>
+            <svg class="icon sm" style="color:#7e8b9d"><use href="#i-folder"/></svg>
+            生产环境 <span class="g-count">5</span>
+            <svg class="icon xs g-add"><use href="#i-plus"/></svg>
+          </div>
+          <div class="session active">
+            <span class="proto ssh">SSH</span>
+            <div class="session-body">
+              <div class="session-name">prod-web-01</div>
+              <div class="session-host">10.0.0.21:22</div>
+            </div>
+            <span class="status-dot online"></span>
+          </div>
+          <div class="session">
+            <span class="proto ssh">SSH</span>
+            <div class="session-body">
+              <div class="session-name">prod-db-02</div>
+              <div class="session-host">10.0.0.22:22</div>
+            </div>
+            <span class="status-dot online"></span>
+          </div>
+          <div class="session">
+            <span class="proto ssh">SSH</span>
+            <div class="session-body">
+              <div class="session-name">prod-cache-03</div>
+              <div class="session-host">10.0.0.23:22</div>
+            </div>
+            <span class="status-dot online"></span>
+          </div>
+          <div class="session">
+            <span class="proto ssh">SSH</span>
+            <div class="session-body">
+              <div class="session-name">prod-worker-04</div>
+              <div class="session-host">10.0.0.24:22</div>
+            </div>
+            <span class="status-dot idle"></span>
+          </div>
+          <div class="session">
+            <span class="proto ssh">SSH</span>
+            <div class="session-body">
+              <div class="session-name">跳板机 bastion</div>
+              <div class="session-host">ops@10.0.0.5:2222</div>
+            </div>
+            <span class="status-dot online"></span>
+          </div>
+        </div>
+
+        <!-- 测试环境 -->
+        <div class="group">
+          <div class="group-hd">
+            <svg class="icon xs"><use href="#i-chev-down"/></svg>
+            <svg class="icon sm" style="color:#7e8b9d"><use href="#i-folder"/></svg>
+            测试环境 <span class="g-count">3</span>
+            <svg class="icon xs g-add"><use href="#i-plus"/></svg>
+          </div>
+          <div class="session">
+            <span class="proto ssh">SSH</span>
+            <div class="session-body">
+              <div class="session-name">test-web-01</div>
+              <div class="session-host">10.0.10.21:22</div>
+            </div>
+            <span class="status-dot online"></span>
+          </div>
+          <div class="session">
+            <span class="proto ssh">SSH</span>
+            <div class="session-body">
+              <div class="session-name">test-db-01</div>
+              <div class="session-host">10.0.10.22:22</div>
+            </div>
+            <span class="status-dot idle"></span>
+          </div>
+          <div class="session">
+            <span class="proto ssh">SSH</span>
+            <div class="session-body">
+              <div class="session-name">test-k8s-node</div>
+              <div class="session-host">10.0.10.30:22</div>
+            </div>
+            <span class="status-dot off"></span>
+          </div>
+        </div>
+
+        <!-- 本地串口 -->
+        <div class="group">
+          <div class="group-hd">
+            <svg class="icon xs"><use href="#i-chev-down"/></svg>
+            <svg class="icon sm" style="color:#7e8b9d"><use href="#i-folder"/></svg>
+            本地串口 <span class="g-count">3</span>
+            <svg class="icon xs g-add"><use href="#i-plus"/></svg>
+          </div>
+          <div class="session">
+            <span class="proto serial">SERIAL</span>
+            <div class="session-body">
+              <div class="session-name">传感器网关</div>
+              <div class="session-host">COM3 · 115200 8-N-1</div>
+            </div>
+            <span class="status-dot online"></span>
+          </div>
+          <div class="session">
+            <span class="proto serial">SERIAL</span>
+            <div class="session-body">
+              <div class="session-name">工业电表 DTSD1352</div>
+              <div class="session-host">COM5 · 9600 8-N-1</div>
+            </div>
+            <span class="status-dot idle"></span>
+          </div>
+          <div class="session">
+            <span class="proto serial">SERIAL</span>
+            <div class="session-body">
+              <div class="session-name">4G DTU 模组</div>
+              <div class="session-host">COM7 · 115200 8-N-1</div>
+            </div>
+            <span class="status-dot off"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-tip">
+        <svg class="icon sm tip-icon"><use href="#i-bulb"/></svg>
+        <div>
+          <div class="tip-title">分屏提示</div>
+          <div class="tip-text">拖拽标签页到窗格边缘，可拆分为 2×2、1×3 等 12 种布局</div>
+        </div>
+      </div>
+
+      <div class="sidebar-foot">
+        <div class="foot-link"><svg class="icon sm"><use href="#i-scan"/></svg>串口扫描<span class="arrow">3</span></div>
+        <div class="foot-link"><svg class="icon sm"><use href="#i-key"/></svg>密钥与凭据管理<svg class="icon xs arrow"><use href="#i-chev-right"/></svg></div>
+        <div class="foot-link"><svg class="icon sm"><use href="#i-import"/></svg>从 PuTTY 导入会话<svg class="icon xs arrow"><use href="#i-chev-right"/></svg></div>
+      </div>
+    </aside>
+
+    <!-- ---------- 主列 ---------- -->
+    <div class="maincol">
+
+      <!-- 标签栏 -->
+      <div class="tabbar">
+        <div class="tab active">
+          <svg class="icon sm" style="color:#8fb8ff"><use href="#i-server"/></svg>
+          <span class="tab-name">生产 Web-01</span>
+          <span class="tab-close"><svg class="icon xs"><use href="#i-close"/></svg></span>
+        </div>
+        <div class="tab">
+          <svg class="icon sm" style="color:#8fb8ff"><use href="#i-server"/></svg>
+          <span class="tab-name">生产 DB-02</span>
+          <span class="tab-close"><svg class="icon xs"><use href="#i-close"/></svg></span>
+        </div>
+        <div class="tab">
+          <svg class="icon sm" style="color:#8fb8ff"><use href="#i-server"/></svg>
+          <span class="tab-name">跳板机</span>
+          <span class="tab-close"><svg class="icon xs"><use href="#i-close"/></svg></span>
+        </div>
+        <div class="tab">
+          <svg class="icon sm" style="color:#63e2d0"><use href="#i-plug"/></svg>
+          <span class="tab-name">传感器网关</span>
+          <span class="tab-close"><svg class="icon xs"><use href="#i-close"/></svg></span>
+        </div>
+        <div class="tab">
+          <svg class="icon sm" style="color:#c0aef7"><use href="#i-terminal"/></svg>
+          <span class="tab-name">PowerShell</span>
+          <span class="tab-close"><svg class="icon xs"><use href="#i-close"/></svg></span>
+        </div>
+        <div class="tab-new"><svg class="icon sm"><use href="#i-plus"/></svg></div>
+
+        <div class="tabbar-right">
+          <span class="pane-label">分屏</span>
+          <div class="seg-ic">
+            <button class="active" title="左右分屏"><svg class="icon sm"><use href="#i-split-v"/></svg></button>
+            <button title="上下分屏"><svg class="icon sm"><use href="#i-split-h"/></svg></button>
+            <button title="2×2 四窗格"><svg class="icon sm"><use href="#i-grid"/></svg></button>
+            <button title="单窗格"><svg class="icon sm"><use href="#i-single"/></svg></button>
+          </div>
+          <div class="divider"></div>
+          <button class="tb-btn" title="布局选项"><svg class="icon sm"><use href="#i-more"/></svg></button>
+        </div>
+      </div>
+
+      <!-- 终端分屏区 -->
+      <div class="panes row">
+        <!-- 左：SSH -->
+        <div class="pane">
+          <div class="pane-hd">
+            <span class="p-dot"></span>
+            <span class="p-title">prod-web-01</span>
+            <span class="p-split">/</span>
+            <span class="p-host">ssh ops@10.0.0.21:22</span>
+            <span class="p-flag prod">生产</span>
+            <span class="tools">
+              <button class="tool-btn" title="垂直拆分"><svg class="icon xs"><use href="#i-split-v"/></svg></button>
+              <button class="tool-btn" title="最大化窗格"><svg class="icon xs"><use href="#i-maximize"/></svg></button>
+              <button class="tool-btn" title="关闭窗格"><svg class="icon xs"><use href="#i-close"/></svg></button>
+            </span>
+          </div>
+          <div class="pane-body">
+<div class="ln"><span class="t-dim">Last login: Mon Nov 24 19:32:08 2026 from 10.0.0.5</span></div>
+<div class="ln"> </div>
+<div class="ln"><span class="t-green t-bold">ops@prod-web-01</span><span class="t-dim">:</span><span class="t-blue">~</span><span class="t-green">$</span> <span class="t-white">docker ps --format "table {{.Names}}\t{{.Status}}"</span></div>
+<div class="ln"><span class="t-cyan t-bold">NAMES              </span><span class="t-cyan t-bold">STATUS</span></div>
+<div class="ln"><span class="t-cyan">web-nginx          </span><span class="t-green">Up 12 days (healthy)</span></div>
+<div class="ln"><span class="t-cyan">api-gateway        </span><span class="t-green">Up 12 days (healthy)</span></div>
+<div class="ln"><span class="t-cyan">redis-cache        </span><span class="t-green">Up 12 days</span></div>
+<div class="ln"><span class="t-cyan">postgres-main      </span><span class="t-green">Up 12 days (healthy)</span></div>
+<div class="ln"><span class="t-cyan">celery-worker-1    </span><span class="t-green">Up 3 days</span></div>
+<div class="ln"><span class="t-cyan">node-exporter      </span><span class="t-yellow">Restarting (1) 4s</span></div>
+<div class="ln"> </div>
+<div class="ln"><span class="t-green t-bold">ops@prod-web-01</span><span class="t-dim">:</span><span class="t-blue">~</span><span class="t-green">$</span> <span class="t-white">docker logs api-gateway --tail 6</span></div>
+<div class="ln"><span class="t-dim">19:38:41.204</span>  <span class="t-green">INFO </span> <span class="t-dim">[http ]</span> GET  <span class="t-blue">/api/v1/orders</span>       <span class="t-green">200</span>  <span class="t-dim">12ms</span></div>
+<div class="ln"><span class="t-dim">19:38:42.006</span>  <span class="t-green">INFO </span> <span class="t-dim">[cache]</span> redis hit ratio <span class="t-cyan">96.8%</span></div>
+<div class="ln"><span class="t-dim">19:38:42.771</span>  <span class="t-yellow">WARN </span> <span class="t-dim">[pool ]</span> db pool 8/10, wait <span class="t-yellow">34ms</span></div>
+<div class="ln"><span class="t-dim">19:38:44.019</span>  <span class="t-green">INFO </span> <span class="t-dim">[http ]</span> POST <span class="t-blue">/api/v1/cart/add</span>    <span class="t-green">201</span>  <span class="t-dim">28ms</span></div>
+<div class="ln"><span class="t-dim">19:38:45.330</span>  <span class="t-red">ERROR</span> <span class="t-dim">[http ]</span> GET  <span class="t-blue">/api/v1/report</span>     <span class="t-red t-bold">500</span>  <span class="t-dim">132ms</span></div>
+<div class="ln"><span class="t-dim">19:38:45.331</span>  <span class="t-red">ERROR</span> <span class="t-dim">[db   ]</span> pg: relation <span class="t-yellow">"report_2026"</span> not exist</div>
+<div class="ln"> </div>
+<div class="ln"><span class="t-green t-bold">ops@prod-web-01</span><span class="t-dim">:</span><span class="t-blue">~</span><span class="t-green">$</span> <span class="t-white">df -h / /data</span></div>
+<div class="ln"><span class="t-cyan">Filesystem      Size  Used Avail Use% Mounted on</span></div>
+<div class="ln">/dev/nvme0n1p2  <span class="t-white">200G</span>  <span class="t-white"> 86G</span>  <span class="t-white">104G</span>  <span class="t-green">46%</span> /</div>
+<div class="ln">/dev/nvme0n1p3  <span class="t-white">1.8T</span>  <span class="t-white">1.2T</span>  <span class="t-white">512G</span>  <span class="t-yellow">67%</span> /data</div>
+<div class="ln"> </div>
+<div class="ln"><span class="t-green t-bold">ops@prod-web-01</span><span class="t-dim">:</span><span class="t-blue">~</span><span class="t-green">$</span> <span class="t-white">uptime</span></div>
+<div class="ln"> 19:39:02 up 12 days,  4:21,  2 users,  load average: <span class="t-green">0.42</span>, <span class="t-green">0.51</span>, 0.47</div>
+<div class="ln"> </div>
+<div class="ln"><span class="t-green t-bold">ops@prod-web-01</span><span class="t-dim">:</span><span class="t-blue">~</span><span class="t-green">$</span> <span class="t-white">ss -tlnp | head -4</span></div>
+<div class="ln"><span class="t-cyan">State  Recv-Q Send-Q Local Address:Port   Peer</span></div>
+<div class="ln">LISTEN 0      511    0.0.0.0:80           0.0.0.0:*</div>
+<div class="ln">LISTEN 0      4096   127.0.0.1:5432       0.0.0.0:*</div>
+<div class="ln">LISTEN 0      511    0.0.0.0:8080         0.0.0.0:*</div>
+<div class="ln"> </div>
+<div class="ln"><span class="t-green t-bold">ops@prod-web-01</span><span class="t-dim">:</span><span class="t-blue">~</span><span class="t-green">$</span> <span class="t-cursor"></span></div>
+          </div>
+        </div>
+
+        <!-- 右：串口 -->
+        <div class="pane">
+          <div class="pane-hd">
+            <span class="p-dot serial"></span>
+            <span class="p-title">传感器网关</span>
+            <span class="p-split">/</span>
+            <span class="p-host">COM3 · 115200 8-N-1</span>
+            <span class="p-flag local">串口</span>
+            <span class="tools">
+              <button class="tool-btn" title="垂直拆分"><svg class="icon xs"><use href="#i-split-v"/></svg></button>
+              <button class="tool-btn" title="最大化窗格"><svg class="icon xs"><use href="#i-maximize"/></svg></button>
+              <button class="tool-btn" title="关闭窗格"><svg class="icon xs"><use href="#i-close"/></svg></button>
+            </span>
+          </div>
+          <div class="pane-body">
+<div class="ln"><span class="t-teal">── 打开 COM3 · 115200 8-N-1 · 无流控 · 本地回显关闭 ──</span></div>
+<div class="ln"> </div>
+<div class="ln"><span class="t-dim">[19:36:02.114]</span> <span class="t-magenta">AT+RST</span></div>
+<div class="ln"><span class="t-dim">[19:36:02.402]</span> <span class="t-green">OK</span></div>
+<div class="ln"><span class="t-dim">[19:36:02.410]</span> ready  baud=115200  fw=<span class="t-white">2.4.1</span></div>
+<div class="ln"><span class="t-dim">[19:36:02.955]</span> <span class="t-magenta">AT+CSQ</span></div>
+<div class="ln"><span class="t-dim">[19:36:03.120]</span> <span class="t-green">+CSQ: 24,99</span>   <span class="t-dim">RSSI 良好</span></div>
+<div class="ln"><span class="t-dim">[19:36:03.288]</span> <span class="t-magenta">AT+CGATT?</span></div>
+<div class="ln"><span class="t-dim">[19:36:03.401]</span> <span class="t-green">+CGATT: 1</span></div>
+<div class="ln"><span class="t-dim">[19:36:03.512]</span> <span class="t-magenta">AT+CEREG?</span></div>
+<div class="ln"><span class="t-dim">[19:36:03.590]</span> <span class="t-green">+CEREG: 0,1,"1A2B","00C1F2A3",7</span></div>
+<div class="ln"> </div>
+<div class="ln"><span class="t-dim">[19:37:10.114]</span> <span class="t-cyan">SENSOR</span> T=<span class="t-white">23.6C</span>  H=<span class="t-white">48.2%</span>  P=<span class="t-white">101.3kPa</span></div>
+<div class="ln"><span class="t-dim">[19:37:10.512]</span> <span class="t-cyan">SENSOR</span> CO2=<span class="t-white">612ppm</span>  PM2.5=<span class="t-white">18µg/m³</span></div>
+<div class="ln"><span class="t-dim">[19:37:41.020]</span> <span class="t-blue">MQTT</span>   publish topic=<span class="t-green">gw/telemetry</span> qos=1</div>
+<div class="ln"><span class="t-dim">[19:37:41.510]</span> <span class="t-blue">MQTT</span>   puback id=<span class="t-dim">0x2A31</span> rtt=<span class="t-green">41ms</span></div>
+<div class="ln"> </div>
+<div class="ln"><span class="t-dim">[19:38:02.111]</span> <span class="t-yellow t-bold">WARN</span>    battery <span class="t-yellow">18%</span>  low-power mode</div>
+<div class="ln"><span class="t-dim">[19:38:05.211]</span> <span class="t-red t-bold">ERR </span>    modbus timeout slave=0x03 retry 2/3</div>
+<div class="ln"><span class="t-dim">[19:38:06.702]</span> <span class="t-red t-bold">ERR </span>    modbus timeout slave=0x03 retry 3/3</div>
+<div class="ln"><span class="t-dim">[19:38:07.003]</span> <span class="t-yellow t-bold">WARN</span>    slave 0x03 offline, queued <span class="t-yellow">12</span> frames</div>
+<div class="ln"> </div>
+<div class="ln"><span class="t-dim">[19:39:02.900]</span> <span class="t-magenta">AT+CSQ</span></div>
+<div class="ln"><span class="t-dim">[19:39:03.020]</span> <span class="t-green">+CSQ: 23,99</span></div>
+<div class="ln"><span class="t-dim">[19:39:03.140]</span> STATUS  uptime=<span class="t-white">6d02h</span>  free_heap=<span class="t-white">92KB</span></div>
+<div class="ln"> </div>
+<div class="ln"><span class="t-dim">[19:39:08.221]</span> <span class="t-magenta">AT+CSQ</span></div>
+<div class="ln"><span class="t-dim">[19:39:08.340]</span> <span class="t-green">+CSQ: 23,99</span></div>
+<div class="ln"><span class="t-dim">[19:39:09.114]</span> <span class="t-cyan">SENSOR</span> T=<span class="t-white">23.7C</span>  H=<span class="t-white">48.0%</span>  P=<span class="t-white">101.3kPa</span></div>
+<div class="ln"><span class="t-dim">[19:39:09.502]</span> <span class="t-blue">MQTT</span>   publish topic=<span class="t-green">gw/telemetry</span> qos=1</div>
+<div class="ln"><span class="t-dim">[19:39:09.740]</span> <span class="t-blue">MQTT</span>   puback id=<span class="t-dim">0x2A32</span> rtt=<span class="t-green">38ms</span></div>
+<div class="ln"> </div>
+<div class="ln"><span class="t-dim">[19:39:12.001]</span> <span class="t-magenta">AT+CSQ</span> <span class="t-cursor"></span></div>
+          </div>
+          <div class="pane-badge">COM3 · RX 1.24 KB · TX 96 B</div>
+        </div>
+      </div>
+
+      <!-- 宏工具条 -->
+      <div class="macrobar">
+        <div class="macro-label"><svg class="icon xs"><use href="#i-keyboard"/></svg>宏</div>
+        <div class="macro"><span class="dot" style="background:#4c8dff"></span>查看日志</div>
+        <div class="macro"><span class="dot" style="background:#f0564b"></span>错误日志</div>
+        <div class="macro"><span class="dot" style="background:#e8b339"></span>重启服务</div>
+        <div class="macro"><span class="dot" style="background:#2dd4bf"></span>磁盘占用</div>
+        <div class="macro"><span class="dot" style="background:#5c9bff"></span>网络诊断</div>
+        <div class="macro"><span class="dot" style="background:#3dd68c"></span>部署最新版</div>
+        <div class="macro"><span class="dot" style="background:#b18cff"></span>数据库备份</div>
+        <div class="macro"><span class="dot" style="background:#e8c547"></span>系统巡检</div>
+        <div class="macro add"><svg class="icon xs"><use href="#i-plus"/></svg>配置宏</div>
+        <div class="macrobar-right">
+          <span>Ctrl+Shift+1~8 触发</span>
+          <div class="divider"></div>
+          <span style="display:flex;align-items:center;gap:5px"><svg class="icon xs"><use href="#i-gear"/></svg>宏管理</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= 状态栏 ================= -->
+  <div class="statusbar">
+    <div class="sb-left">
+      <span class="status-dot online"></span>
+      <span class="sb-strong">已连接</span>
+      <span class="sb-sep"></span>
+      <span class="sb-item"><span class="mono sb-strong">prod-web-01</span></span>
+      <span class="sb-sep"></span>
+      <span class="sb-item"><span class="mono">SSH · 10.0.0.21:22</span></span>
+    </div>
+    <div class="sb-mid">
+      <span class="sb-item"><span class="mono">UTF-8</span></span>
+      <span class="sb-item"><span class="mono">xterm-256color</span></span>
+      <span class="sb-item"><span class="mono">80×24</span></span>
+      <span class="sb-item">LF</span>
+    </div>
+    <div class="sb-right">
+      <span class="sb-item"><span class="latency-bars"><i></i><i></i><i></i></span><span class="mono sb-strong">12 ms</span></span>
+      <span class="sb-sep"></span>
+      <span class="sb-item"><svg class="icon xs" style="color:#5c6676"><use href="#i-lock"/></svg><span class="mono">AES-256-GCM · SSH-2.0</span></span>
+      <span class="sb-sep"></span>
+      <span class="sb-item"><span class="mono">缓冲 734 行</span></span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
+

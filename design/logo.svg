@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-label="xPuTTY 应用图标">
+  <title>xPuTTY 应用图标</title>
+  <desc>深色圆角方块 + #4C8DFF → #2DD4BF 渐变 “&gt;_” 终端提示符；与标题栏 logo 同一几何路径（16 → 256 等比放大）。</desc>
+
+  <!--
+    xPuTTY brand mark v1.0
+    - 画布 256×256，圆角 56（21.9%）
+    - 底：#12151A → #1C222B 垂直轻渐变（透明圆角外区域）
+    - 符号：">_" 与 shell 标题栏 logo 同一路径，按 0.95 光学缩放（与 ICO 256 帧一致）
+    - 符号着色：沿包围盒对角线 #4C8DFF → #2DD4BF 线性渐变，圆角笔画 25.84
+    - 内描边：1px #313A46 @ 78%，顶部 8.6% 白色高光
+  -->
+
+  <defs>
+    <linearGradient id="xp-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#12151A"/>
+      <stop offset="1" stop-color="#1C222B"/>
+    </linearGradient>
+
+    <!-- 符号渐变：包围盒左上 → 右下（与位图逐尺寸共用同一坐标系） -->
+    <linearGradient id="xp-mark" gradientUnits="userSpaceOnUse"
+                    x1="37.6" y1="56.8" x2="215.2" y2="199.2">
+      <stop offset="0" stop-color="#4C8DFF"/>
+      <stop offset="1" stop-color="#2DD4BF"/>
+    </linearGradient>
+
+    <radialGradient id="xp-glow" cx="0.5" cy="0.5" r="0.52">
+      <stop offset="0" stop-color="#4C8DFF" stop-opacity="0.16"/>
+      <stop offset="0.55" stop-color="#4C8DFF" stop-opacity="0.06"/>
+      <stop offset="1" stop-color="#4C8DFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="xp-sheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.086"/>
+      <stop offset="0.42" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <clipPath id="xp-tile">
+      <rect x="0" y="0" width="256" height="256" rx="56" ry="56"/>
+    </clipPath>
+  </defs>
+
+  <!-- 圆角深色底 + 高光 + 符号辉光 -->
+  <g clip-path="url(#xp-tile)">
+    <rect x="0" y="0" width="256" height="256" fill="url(#xp-bg)"/>
+    <rect x="0" y="0" width="256" height="256" fill="url(#xp-sheen)"/>
+    <rect x="0" y="0" width="256" height="256" fill="url(#xp-glow)"/>
+  </g>
+
+  <!-- 1px 内描边 -->
+  <rect x="0.5" y="0.5" width="255" height="255" rx="55.5" ry="55.5"
+        fill="none" stroke="#313A46" stroke-opacity="0.78" stroke-width="1"/>
+
+  <!-- “>_” 终端提示符（圆角笔画、圆端点） -->
+  <g fill="none" stroke="url(#xp-mark)" stroke-width="25.84"
+     stroke-linecap="round" stroke-linejoin="round">
+    <path d="M55.04 73.28 L106.72 128 L55.04 182.72"/>
+    <path d="M134.08 182.72 H197.92"/>
+  </g>
+
+  <!-- 小尺寸（16 / 20 / 24）由 design/tools/make-icon.py 按简化策略单独栅格化：
+       去内描边与高光、笔画加粗到 ~10.5%、符号相对放大 3~5%，保证像素级清晰。 -->
+</svg>

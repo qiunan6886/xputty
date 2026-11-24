@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  xPuTTY 1.0.0 per-machine installer (WiX 3.14.1).
+  Built by D:\workspace\xputty\build-all.ps1, do not edit paths by hand.
+
+  Preprocessor variables (all passed by build-all.ps1, defaults are for manual runs):
+    SourceDir    staging directory containing the binaries/docs/icon
+    ProductIcon  .ico file used for ARPPRODUCTICON and shortcut icons
+    LicenseRtf   licence RTF shown by the WixUI_InstallDir licence page
+    Themes       1 = include themes\default.ini, 0 = omit it
+    Scope        perMachine (deliverable, default) or perUser (self-test variant)
+
+  The perUser scope exists only to let the CI/self-test install and uninstall
+  the *same* payload without an elevated token (per-machine installs require
+  administrator rights). The shipped artifact is always perMachine.
+-->
+<?ifndef SourceDir ?>
+<?define SourceDir = "..\build\stage" ?>
+<?endif ?>
+<?ifndef ProductIcon ?>
+<?define ProductIcon = "..\build\stage\xputty.ico" ?>
+<?endif ?>
+<?ifndef LicenseRtf ?>
+<?define LicenseRtf = "license.rtf" ?>
+<?endif ?>
+<?ifndef Themes ?>
+<?define Themes = "0" ?>
+<?endif ?>
+<?ifndef Scope ?>
+<?define Scope = "perMachine" ?>
+<?endif ?>
+<?ifndef ProductVersion ?>
+<?define ProductVersion = "1.0.0" ?>
+<?endif ?>
+
+<?if $(var.Scope) = "perMachine" ?>
+<?define InstallRootId = "ProgramFiles64Folder" ?>
+<?define Win64Attr = "yes" ?>
+<?define RegRoot = "HKLM" ?>
+<?else ?>
+<?define InstallRootId = "LocalAppDataFolder" ?>
+<?define Win64Attr = "no" ?>
+<?define RegRoot = "HKCU" ?>
+<?endif ?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*"
+           Name="xPuTTY"
+           Language="1033"
+           Version="$(var.ProductVersion)"
+           Manufacturer="xPuTTY"
+           UpgradeCode="{7F3B9C1A-2E84-4D5B-9A67-C0B1E5D4F2A3}">
+
+    <Package InstallerVersion="500"
+             Compressed="yes"
+             InstallScope="$(var.Scope)"
+             Platform="x64"
+             Description="xPuTTY $(var.ProductVersion) - terminal shell with a PuTTY 0.85 core (64-bit Windows 10/11)"
+             Comments="xPuTTY $(var.ProductVersion)" />
+
+    <MajorUpgrade AllowSameVersionUpgrades="yes"
+                  Schedule="afterInstallValidate"
+                  DowngradeErrorMessage="A newer version of xPuTTY is already installed." />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <Condition Message="xPuTTY requires 64-bit Windows 10 or newer.">Installed OR (VersionNT64 AND VersionNT &gt;= 1000)</Condition>
+
+    <Icon Id="ProductIcon" SourceFile="$(var.ProductIcon)" />
+    <Property Id="ARPPRODUCTICON" Value="ProductIcon" />
+    <Property Id="ARPCOMMENTS" Value="xPuTTY terminal shell with a PuTTY 0.85 core" />
+    <Property Id="ARPNOMODIFY" Value="1" />
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.LicenseRtf)" />
+
+    <UI>
+      <UIRef Id="WixUI_InstallDir" />
+      <UIRef Id="WixUI_ErrorProgressText" />
+    </UI>
+
+    <Feature Id="Complete"
+             Title="xPuTTY"
+             Description="xPuTTY shell, PuTTY 0.85 tools and documentation"
+             Level="1"
+             Display="expand"
+             AllowAbsent="no">
+      <ComponentRef Id="XPuttyExe" />
+      <ComponentRef Id="PuttyCore" />
+<?if $(var.Themes) = "1" ?>
+      <ComponentRef Id="Themes" />
+<?endif ?>
+      <ComponentRef Id="Documentation" />
+      <ComponentRef Id="StartMenuShortcuts" />
+      <ComponentRef Id="DesktopShortcut" />
+    </Feature>
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="$(var.InstallRootId)">
+        <Directory Id="INSTALLFOLDER" Name="xPuTTY">
+
+          <!-- Main shell executable.  Also owns the INSTALLFOLDER cleanup so
+               an uninstall leaves no empty directory behind. -->
+          <Component Id="XPuttyExe"
+                     Guid="{1A2B3C4D-5E6F-4A70-8B91-C2D3E4F5A607}"
+                     Win64="$(var.Win64Attr)">
+            <File Id="xputty.exe"
+                  Name="xputty.exe"
+                  Source="$(var.SourceDir)\xputty.exe" />
+            <RegistryValue Root="$(var.RegRoot)"
+                           Key="Software\xPuTTY\Components"
+                           Name="xputty.exe"
+                           Type="integer"
+                           Value="1"
+                           KeyPath="yes" />
+            <RemoveFolder Id="RemoveINSTALLFOLDER" On="uninstall" />
+          </Component>
+
+          <!-- PuTTY 0.85 based console/GUI tools. -->
+          <Component Id="PuttyCore"
+                     Guid="{2B3C4D5E-6F70-4B81-9CA2-D3E4F5A6B718}"
+                     Win64="$(var.Win64Attr)">
+            <File Id="putty.exe"   Name="putty.exe"   Source="$(var.SourceDir)\putty.exe" />
+            <File Id="plink.exe"   Name="plink.exe"   Source="$(var.SourceDir)\plink.exe" />
+            <File Id="pscp.exe"    Name="pscp.exe"    Source="$(var.SourceDir)\pscp.exe" />
+            <File Id="psftp.exe"   Name="psftp.exe"   Source="$(var.SourceDir)\psftp.exe" />
+            <File Id="puttygen.exe" Name="puttygen.exe" Source="$(var.SourceDir)\puttygen.exe" />
+            <File Id="pageant.exe" Name="pageant.exe" Source="$(var.SourceDir)\pageant.exe" />
+            <RegistryValue Root="$(var.RegRoot)"
+                           Key="Software\xPuTTY\Components"
+                           Name="putty-core"
+                           Type="integer"
+                           Value="1"
+                           KeyPath="yes" />
+          </Component>
+
+<?if $(var.Themes) = "1" ?>
+          <!-- Optional terminal theme file (generated by the shell at runtime too). -->
+          <Directory Id="ThemesFolder" Name="themes">
+            <Component Id="Themes"
+                       Guid="{3C4D5E6F-7081-4C92-ADB3-E4F5A6B7C829}"
+                       Win64="$(var.Win64Attr)">
+              <File Id="default.ini"
+                    Name="default.ini"
+                    Source="$(var.SourceDir)\themes\default.ini" />
+              <RegistryValue Root="$(var.RegRoot)"
+                             Key="Software\xPuTTY\Components"
+                             Name="themes-default.ini"
+                             Type="integer"
+                             Value="1"
+                             KeyPath="yes" />
+              <RemoveFolder Id="RemoveThemesFolder" On="uninstall" />
+            </Component>
+          </Directory>
+<?endif ?>
+
+          <!-- Licence + PuTTY documentation. -->
+          <Component Id="Documentation"
+                     Guid="{4D5E6F70-8192-4DA3-BEC4-F5A6B7C8D93A}"
+                     Win64="$(var.Win64Attr)">
+            <File Id="LICENCE.TXT"
+                  Name="LICENCE.txt"
+                  Source="$(var.SourceDir)\LICENCE.txt" />
+            <File Id="README-PuTTY.txt"
+                  Name="README-PuTTY.txt"
+                  Source="$(var.SourceDir)\README-PuTTY.txt" />
+            <RegistryValue Root="$(var.RegRoot)"
+                           Key="Software\xPuTTY\Components"
+                           Name="docs"
+                           Type="integer"
+                           Value="1"
+                           KeyPath="yes" />
+          </Component>
+
+        </Directory>
+      </Directory>
+
+      <!-- Start menu: xPuTTY folder with the shell, native PuTTY and PuTTYgen. -->
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="xPuTTY">
+          <Component Id="StartMenuShortcuts"
+                     Guid="{5E6F7081-92A3-4EB4-CFD5-06B7C8D9EA4B}"
+                     Win64="$(var.Win64Attr)">
+            <Shortcut Id="SM_XPutty"
+                      Name="xPuTTY"
+                      Description="xPuTTY terminal shell"
+                      Target="[INSTALLFOLDER]xputty.exe"
+                      WorkingDirectory="INSTALLFOLDER"
+                      Icon="ProductIcon" />
+            <Shortcut Id="SM_PuTTY"
+                      Name="PuTTY"
+                      Description="PuTTY SSH / Telnet client"
+                      Target="[INSTALLFOLDER]putty.exe"
+                      WorkingDirectory="INSTALLFOLDER"
+                      Icon="ProductIcon" />
+            <Shortcut Id="SM_PuTTYgen"
+                      Name="PuTTYgen"
+                      Description="PuTTY key generator"
+                      Target="[INSTALLFOLDER]puttygen.exe"
+                      WorkingDirectory="INSTALLFOLDER"
+                      Icon="ProductIcon" />
+            <RemoveFolder Id="RemoveApplicationProgramsFolder" On="uninstall" />
+            <RegistryValue Root="$(var.RegRoot)"
+                           Key="Software\xPuTTY\Components"
+                           Name="start-menu"
+                           Type="integer"
+                           Value="1"
+                           KeyPath="yes" />
+          </Component>
+        </Directory>
+      </Directory>
+
+      <!-- Desktop shortcut to the shell (created by default). -->
+      <Directory Id="DesktopFolder">
+        <Component Id="DesktopShortcut"
+                   Guid="{6F708192-A3B4-4FC5-D0E6-17C8D9EAFB5C}"
+                   Win64="$(var.Win64Attr)">
+          <Shortcut Id="Desktop_XPutty"
+                    Name="xPuTTY"
+                    Description="xPuTTY terminal shell"
+                    Target="[INSTALLFOLDER]xputty.exe"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="ProductIcon" />
+          <RegistryValue Root="$(var.RegRoot)"
+                         Key="Software\xPuTTY\Components"
+                         Name="desktop-shortcut"
+                         Type="integer"
+                         Value="1"
+                         KeyPath="yes" />
+        </Component>
+      </Directory>
+    </Directory>
+  </Product>
+</Wix>

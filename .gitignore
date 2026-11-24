@@ -1,0 +1,23 @@
+# build outputs
+/build/
+/dist/
+/_dl/
+/_scratch/
+/tools/wix/
+*.log
+*.msi
+*.wixobj
+*.wixpdb
+*.pdb
+*.obj
+*.exe
+!tools/**/*.exe
+
+# PuTTY build trees
+/putty-src/
+/tartarus-test/
+
+# OS noise
+Thumbs.db
+desktop.ini
+.DS_Store
