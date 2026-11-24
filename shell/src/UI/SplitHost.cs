@@ -52,12 +52,18 @@ namespace XPutty
         protected override void OnVisibleChanged(EventArgs e)
         {
             base.OnVisibleChanged(e);
-            if (!Visible) return;
+            if (!Visible || Disposing || IsDisposed) return;
             if (Tree != null)
             {
                 Relayout();
                 EnsurePanesStarted();
             }
+        }
+
+        /// <summary>A pane is safe to lay out only while it is alive.</summary>
+        private static bool PaneAlive(PaneView pane)
+        {
+            return pane != null && !pane.IsDisposed && !pane.Disposing;
         }
 
         // ------------------------------------------------------------------
@@ -85,6 +91,26 @@ namespace XPutty
         /// <summary>Position every pane according to the tree.</summary>
         public void Relayout()
         {
+            if (Disposing || IsDisposed) return;
+            try
+            {
+                RelayoutCore();
+            }
+            catch (ObjectDisposedException)
+            {
+                // A tab/pane can be torn down while a layout pass is in
+                // flight (e.g. closing a tab disposes panes before the host's
+                // WM_SHOWWINDOW/VisibleChanged callback runs).  The tab is
+                // going away anyway, so swallow it instead of crashing.
+            }
+            catch (Exception ex)
+            {
+                Diag.Log("SplitHost.Relayout: " + ex);
+            }
+        }
+
+        private void RelayoutCore()
+        {
             if (Tree == null || Tree.Root == null)
             {
                 for (int i = Controls.Count - 1; i >= 0; i--)
@@ -96,7 +122,8 @@ namespace XPutty
                 return;
             }
 
-            if (MaximizedPane != null && Tree.FindLeaf(MaximizedPane) == null)
+            if (MaximizedPane != null && (!PaneAlive(MaximizedPane) ||
+                                           Tree.FindLeaf(MaximizedPane) == null))
                 MaximizedPane = null;
 
             if (MaximizedPane != null)
@@ -106,6 +133,7 @@ namespace XPutty
                 for (int i = 0; i < all.Count; i++)
                 {
                     PaneView p = all[i];
+                    if (!PaneAlive(p)) continue;
                     bool vis = p == MaximizedPane;
                     if (p.Parent != this) Controls.Add(p);
                     if (p.Bounds.Width != Width || p.Bounds.Height != Height)
@@ -127,6 +155,7 @@ namespace XPutty
             for (int i = 0; i < placements.Count; i++)
             {
                 PanePlacement pl = placements[i];
+                if (!PaneAlive(pl.Pane)) continue;
                 present.Add(pl.Pane);
                 if (pl.Pane.Parent != this) Controls.Add(pl.Pane);
                 if (pl.Pane.Bounds != pl.Bounds) pl.Pane.SetBounds(pl.Bounds.X, pl.Bounds.Y,
@@ -147,6 +176,8 @@ namespace XPutty
 
         public void SetActivePane(PaneView pane, bool raiseEvent)
         {
+            if (Disposing || IsDisposed) return;
+            if (pane != null && !PaneAlive(pane)) return;
             if (pane != null && Tree != null && Tree.FindLeaf(pane) == null) return;
             bool changed = ActivePane != pane;
             ActivePane = pane;
@@ -155,6 +186,7 @@ namespace XPutty
             var panes = Tree != null ? Tree.EnumeratePanes() : new List<PaneView>();
             for (int i = 0; i < panes.Count; i++)
             {
+                if (!PaneAlive(panes[i])) continue;
                 bool active = panes[i] == pane;
                 if (panes[i].IsActive != active)
                 {
@@ -174,6 +206,7 @@ namespace XPutty
             var panes = Tree.EnumeratePanes();
             for (int i = 0; i < panes.Count; i++)
             {
+                if (!PaneAlive(panes[i])) continue;
                 if (MaximizedPane != null && panes[i] != MaximizedPane) continue;
                 panes[i].EnsureStarted();
             }

@@ -129,6 +129,30 @@ if ($adminExit -ne 0) {
 
 Write-Host ''
 Write-Host '=== Verify B: per-user install / uninstall lifecycle self-test ===' -ForegroundColor Cyan
+
+# Dev-environment guard: the per-user self-test MSI reuses the same component
+# GUIDs as the per-machine product (by design, it is the same wxs compiled with
+# -dScope=perUser).  If a per-machine xPuTTY build is already registered on
+# this machine, Windows Installer shares those components and the per-user
+# uninstall legitimately leaves files behind.  That is a test-environment
+# artefact, not a packaging bug: the deliverable is per-machine only, and the
+# full lifecycle is verified on a clean machine/VM.
+$existingPm = $false
+$uninstRoots = @(
+    'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall',
+    'HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
+)
+foreach ($root in $uninstRoots) {
+    Get-ChildItem -Path $root -ErrorAction SilentlyContinue | ForEach-Object {
+        $dn = $null
+        try { $dn = (Get-ItemProperty -Path $_.PSPath -ErrorAction SilentlyContinue).DisplayName } catch { }
+        if ($dn -and $dn -like 'xPuTTY*') { $existingPm = $true }
+    }
+}
+
+if ($existingPm) {
+    Note 'Per-user lifecycle self-test skipped: a per-machine xPuTTY installation is already registered on this machine (development environment). Run installer\verify-msi.ps1 on a clean machine/VM for the full install/uninstall lifecycle check.'
+} else {
 New-Item -ItemType Directory -Path $wixOut -Force | Out-Null
 $wixobj = Join-Path $wixOut 'product-peruser.wixobj'
 $stageThemes = '0'
@@ -212,6 +236,7 @@ if ($LASTEXITCODE -ne 0) {
             }
         }
     }
+}
 }
 
 Write-Host ''

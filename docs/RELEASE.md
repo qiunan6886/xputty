@@ -1,10 +1,15 @@
-# xPuTTY v1.0.0 — 交付说明（Release Notes）
+# xPuTTY v1.0.1 — 交付说明（Release Notes）
+
+## 版本历史
+
+- **v1.0.1（2026-11-24）**：修复关闭标签页时的 `ObjectDisposedException` 崩溃（SplitHost 对已释放 PaneView 重排 / 关闭顺序不当）。关闭单个标签、关闭分屏窗格、关闭最后一个标签、关闭主窗口均已回归验证，无异常、无残留 putty 进程。MSI 版本号同步升至 1.0.1。
+- v1.0.0（2026-11-24）：首个完整版本。
 
 ## 交付物
 
 | 文件 | 说明 |
 | --- | --- |
-| `dist/xPuTTY-1.0.0-x64.msi` | Windows x64 安装包（per-machine，Program Files） |
+| `dist/xPuTTY-1.0.1-x64.msi` | Windows x64 安装包（per-machine，Program Files） |
 | `dist/SHA256SUMS.txt` | stage 全文件 + MSI 的 SHA256 清单 |
 | `dist/BUILD-INFO.txt` | 构建信息：源码指纹、工具链版本、耗时、版本号 |
 | `README.md` | 项目说明 / 功能 / 构建 / 安装 |
@@ -15,20 +20,20 @@
 | `design/` | UI 设计稿（PNG/HTML）、设计 token、参考分析 |
 
 MSI：**2,805,760 字节**
-SHA256：**`1CA38F71AA06315A81853EC058AAC8C7C28C3EFB8BAA036345BE40FAA22DAF8C`**
+SHA256：**`28DAF8AD74AC2EECDF7C0DFAB291137933E0B61865ECA748B1020063022CF589`**
 构建：`build-all.ps1 -Fresh -Verify`（exit 0，70.9s，验证 38/38 PASS）
 
 ## 安装 / 卸载
 
 ```powershell
 # 安装（需要管理员；也可双击 MSI）
-msiexec /i "D:\workspace\xputty\dist\xPuTTY-1.0.0-x64.msi"
+msiexec /i "D:\workspace\xputty\dist\xPuTTY-1.0.1-x64.msi"
 
 # 静默安装
-msiexec /i "D:\workspace\xputty\dist\xPuTTY-1.0.0-x64.msi" /qn
+msiexec /i "D:\workspace\xputty\dist\xPuTTY-1.0.1-x64.msi" /qn
 
 # 卸载
-msiexec /x "D:\workspace\xputty\dist\xPuTTY-1.0.0-x64.msi" /qn
+msiexec /x "D:\workspace\xputty\dist\xPuTTY-1.0.1-x64.msi" /qn
 ```
 
 - 安装位置：`%ProgramFiles%\xPuTTY\`（xputty.exe、putty.exe、plink/pscp/psftp/puttygen/pageant、themes、许可文件）

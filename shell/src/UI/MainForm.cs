@@ -15,7 +15,7 @@ namespace XPutty
     /// </summary>
     public class MainForm : Form
     {
-        public const string AppVersion = "v0.85.1";
+        public const string AppVersion = "v1.0.1";
 
         // ---- panels (SHELL_SPEC §8 public contract) ------------------------
         public SessionSidebar Sidebar;
@@ -712,16 +712,30 @@ namespace XPutty
             if (index < 0 || index >= _tabs.Count) return;
             TermTab tab = _tabs[index];
             var panes = tab.Tree != null ? tab.Tree.EnumeratePanes() : new List<PaneView>();
+
+            /*
+             * Tear the host down BEFORE the panes: disposing the host while a
+             * disposed PaneView is still in its tree lets SplitHost's
+             * WM_SHOWWINDOW/VisibleChanged callback run Relayout() against a
+             * disposed control (ObjectDisposedException).  Clearing the tree
+             * and detaching the panes first keeps every layout pass valid.
+             */
+            SplitHost host = tab.Host;
+            if (host != null)
+            {
+                tab.Host = null;
+                host.Tree = null;
+                Controls.Remove(host);
+                host.Relayout();
+                host.Dispose();
+            }
+
             for (int i = 0; i < panes.Count; i++)
             {
                 panes[i].Close();
                 panes[i].Dispose();
             }
-            if (tab.Host != null)
-            {
-                Controls.Remove(tab.Host);
-                tab.Host.Dispose();
-            }
+
             _tabs.RemoveAt(index);
             if (_tabs.Count == 0)
             {

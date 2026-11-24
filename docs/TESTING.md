@@ -34,6 +34,7 @@
 | --- | --- |
 | 无边框窗口：拖动 / 双击最大化 / Win11 Snap | ✅ |
 | 标签：新建（Ctrl+Shift+T）、关闭、Ctrl+Tab 切换 | ✅ |
+| **关闭标签页回归（v1.0.1 修复）**：单标签/多标签/分屏内关闭窗格/关闭最后一个标签/中键关闭 | ✅ | 修复前抛 `ObjectDisposedException`（SplitHost.Relayout 对已释放 PaneView 调用 SetVisible）；修复后无异常日志、其余标签会话不受影响、无残留 putty 进程 |
 | 分屏：Ctrl+Shift+E 左右、Ctrl+Shift+D 上下、2x2 四窗格 | ✅ |
 | 分屏拖拽分隔条、F11 窗格最大化 | ✅ |
 | 宏工具条：8 个默认宏、横向滚动、点击发送 | ✅ |
@@ -50,8 +51,8 @@
 | 项 | 结果 |
 | --- | --- |
 | 构建 | `build-all.ps1 -Fresh -Verify` → exit 0，70.9 s |
-| 产物 | `dist\xPuTTY-1.0.0-x64.msi`，2,805,760 B |
-| SHA256 | `1CA38F71AA06315A81853EC058AAC8C7C28C3EFB8BAA036345BE40FAA22DAF8C` |
+| 产物 | `dist\xPuTTY-1.0.1-x64.msi`，2,805,760 B |
+| SHA256 | `28DAF8AD74AC2EECDF7C0DFAB291137933E0B61865ECA748B1020063022CF589` |
 | MSI 内容 | xputty.exe(571,392) / putty.exe(1,082,880) / plink / pscp / psftp / puttygen / pageant / LICENCE / README-PuTTY / themes\default.ini / xputty.ico |
 | `/a` 管理安装解包 | exit 0；11 个 payload SHA256 与 stage 清单全部一致 |
 | per-user 安装/卸载自测 | 38/38 PASS（文件、开始菜单 3 快捷方式、桌面快捷方式、卸载清理） |

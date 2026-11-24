@@ -49,7 +49,7 @@ Windows 10/11 专用的 SSH / 串口终端管理器：**基于 PuTTY 0.85 源码
 powershell -ExecutionPolicy Bypass -File .\build-all.ps1
 
 # 产物
-dist\xPuTTY-1.0.0-x64.msi
+dist\xPuTTY-1.0.1-x64.msi
 ```
 
 单步：
@@ -61,7 +61,7 @@ powershell -ExecutionPolicy Bypass -File .\shell\build-shell.ps1
 
 ## 安装 / 卸载
 
-- 双击 `dist\xPuTTY-1.0.0-x64.msi` 安装（需要管理员确认，安装到 `%ProgramFiles%\xPuTTY`）。
+- 双击 `dist\xPuTTY-1.0.1-x64.msi` 安装（需要管理员确认，安装到 `%ProgramFiles%\xPuTTY`）。
 - 卸载：设置 → 应用 → 已安装的应用 → xPuTTY。
 - 用户数据保存在 `%APPDATA%\xPuTTY`（会话/宏/设置，卸载时保留）。
 - 安装包**未做代码签名**，首次运行 SmartScreen 可能提示"更多信息 → 仍要运行"。

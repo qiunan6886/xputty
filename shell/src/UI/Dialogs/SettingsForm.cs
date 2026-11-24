@@ -127,7 +127,7 @@ namespace XPutty
                 Theme.BorderSoft, Math.Max(1f, Theme.SF(1f)));
             UiKit.Icon(g, "info", new Rectangle(r.X + Theme.S(12), r.Y + Theme.S(10), Theme.S(12), Theme.S(12)),
                 Theme.TextTertiary);
-            string l1 = "xPuTTY v0.85.1 · 基于 PuTTY 0.85 内核 · 主题 " + (_theme.SelectedIndex == 0 ? "深色" : "浅色");
+            string l1 = "xPuTTY v1.0.1 · 基于 PuTTY 0.85 内核 · 主题 " + (_theme.SelectedIndex == 0 ? "深色" : "浅色");
             string l2 = "数据目录 " + AppContext.I.DataDir + " · 字体 " + _font.SelectedText + " " + _fontSize.SelectedText + "px";
             UiKit.Text(g, l1, UiKit.UI(10.5f), Theme.TextSecondary,
                 new Rectangle(r.X + Theme.S(32), r.Y + Theme.S(4), r.Width - Theme.S(44), Theme.S(15)), UiKit.L);
