@@ -34,7 +34,7 @@
 | --- | --- |
 | 无边框窗口：拖动 / 双击最大化 / Win11 Snap | ✅ |
 | 标签：新建（Ctrl+Shift+T）、关闭、Ctrl+Tab 切换 | ✅ |
-| **关闭标签页回归（v1.0.2 修复）**：单标签/多标签/分屏内关闭窗格/关闭最后一个标签/中键关闭 | ✅ | 修复前抛 `ObjectDisposedException`（SplitHost.Relayout 对已释放 PaneView 调用 SetVisible）；修复后无异常日志、其余标签会话不受影响、无残留 putty 进程 |
+| **关闭标签页回归（v1.0.1 修复）**：单标签/多标签/分屏内关闭窗格/关闭最后一个标签/中键关闭 | ✅ | 修复前抛 `ObjectDisposedException`（SplitHost.Relayout 对已释放 PaneView 调用 SetVisible）；修复后无异常日志、其余标签会话不受影响、无残留 putty 进程 |
 | 分屏：Ctrl+Shift+E 左右、Ctrl+Shift+D 上下、2x2 四窗格 | ✅ |
 | 分屏拖拽分隔条、F11 窗格最大化 | ✅ |
 | 宏工具条：8 个默认宏、横向滚动、点击发送 | ✅ |
