@@ -68,6 +68,12 @@ powershell -ExecutionPolicy Bypass -File .\shell\build-shell.ps1
 - 用户数据保存在 `%APPDATA%\xPuTTY`（会话/宏/设置，卸载时保留）。
 - 安装包**未做代码签名**，首次运行 SmartScreen 可能提示"更多信息 → 仍要运行"。
 
+## 版本管理
+
+- 仓库：`https://github.com/qiunan6886/xputty`（私有，可在 Settings 中改为公开）
+- 分支：`main`；标签：`v1.0.0` / `v1.0.1` / `v1.0.2`（附 Release 安装包与校验清单）
+- 发版流程见 `docs/RELEASING.md`，变更记录见 `CHANGELOG.md`
+
 ## 源码来源与许可
 
 - `putty/` 基线为 **PuTTY 0.85** 官方源码（2026-08-16，`the.earth.li/~sgtatham/putty/latest/putty-0.85.tar.gz`）。GitHub 上的 `github/putty` 镜像停留在 0.74，因此以官方 tarball 为基线并导入本仓库 git。
