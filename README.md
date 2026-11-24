@@ -70,7 +70,7 @@ powershell -ExecutionPolicy Bypass -File .\shell\build-shell.ps1
 
 ## 版本管理
 
-- 仓库：`https://github.com/qiunan6886/xputty`（私有，可在 Settings 中改为公开）
+- 仓库：`https://github.com/qiunan6886/xputty`（public）
 - 分支：`main`；标签：`v1.0.0` / `v1.0.1` / `v1.0.2`（附 Release 安装包与校验清单）
 - 发版流程见 `docs/RELEASING.md`，变更记录见 `CHANGELOG.md`
 

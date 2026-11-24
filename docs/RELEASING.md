@@ -1,6 +1,6 @@
 # 版本管理与发布流程
 
-仓库：`https://github.com/qiunan6886/xputty`（当前为 **private**，可在 Settings → Danger Zone 改为 public）
+仓库：`https://github.com/qiunan6886/xputty`（public）
 
 ## 分支与标签
 
