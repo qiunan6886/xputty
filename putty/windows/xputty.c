@@ -267,7 +267,7 @@ static FILE *open_utf8_file(const char *path)
     return _wfopen(wpath, L"r");
 }
 
-void xputty_apply_theme(Conf *conf)
+void xputty_load_theme(Conf *conf, const char *path)
 {
     struct ThemeData td;
     char line[1024];
@@ -284,8 +284,8 @@ void xputty_apply_theme(Conf *conf)
     for (i = 0; i < XPUTTY_NCOLOURS; i++)
         td.colour[i] = -1;
 
-    if (theme_file) {
-        fp = open_utf8_file(theme_file);
+    if (path) {
+        fp = open_utf8_file(path);
         if (fp) {
             if (fgets(line, sizeof(line), fp)) {
                 /* Strip a UTF-8 BOM if present. */
@@ -393,23 +393,26 @@ void xputty_apply_theme(Conf *conf)
         conf_set_int(conf, CONF_beep, td.bell);
 
     xputty_trace("theme: terminal opts applied");
-    if (xputty_embedded()) {
-        xputty_trace("theme: embed block");
-        /* Managed mode: the shell owns window management and error
-         * reporting, so suppress the parts of PuTTY's UI that would
-         * pop up outside the shell. */
-        conf_set_bool(conf, CONF_warn_on_close, false);
-        xputty_trace("theme: set warn_on_close");
-        conf_set_int(conf, CONF_close_on_exit, FORCE_OFF);
-        xputty_trace("theme: set close_on_exit");
-        conf_set_bool(conf, CONF_alwaysontop, false);
-        xputty_trace("theme: set alwaysontop");
-        conf_set_bool(conf, CONF_sunken_edge, false);
-        xputty_trace("theme: set sunken_edge");
-        conf_set_int(conf, CONF_window_border, 0);
-        xputty_trace("theme: set window_border");
-    }
     xputty_trace("theme: done");
+}
+
+void xputty_apply_theme(Conf *conf)
+{
+    xputty_load_theme(conf, theme_file);
+
+    if (!xputty_embedded())
+        return;
+
+    xputty_trace("theme: embed block");
+    /* Managed mode: the shell owns window management and error
+     * reporting, so suppress the parts of PuTTY's UI that would
+     * pop up outside the shell. */
+    conf_set_bool(conf, CONF_warn_on_close, false);
+    conf_set_int(conf, CONF_close_on_exit, FORCE_OFF);
+    conf_set_bool(conf, CONF_alwaysontop, false);
+    conf_set_bool(conf, CONF_sunken_edge, false);
+    conf_set_int(conf, CONF_window_border, 0);
+    xputty_trace("theme: embed options applied");
 }
 
 /* ----------------------------------------------------------------------

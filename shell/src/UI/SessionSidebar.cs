@@ -11,7 +11,7 @@ namespace XPutty
     /// tree (27px group rows / 45px session rows with protocol badge, host and
     /// status dot), bottom shortcuts, right-click menu and smooth scrolling.
     /// </summary>
-    public class SessionSidebar : Control
+    public class SessionSidebar : Control, Theme.IThemeAware
     {
         private enum RowKind { Group, Session }
 
@@ -96,6 +96,12 @@ namespace XPutty
         }
 
         // ---- public API (SHELL_SPEC §8) --------------------------------
+        public void ApplyThemeColors()
+        {
+            BackColor = Theme.SidebarBg;
+            Invalidate(true);
+        }
+
         public void SetSessions(List<SessionDef> sessions, string filter)
         {
             _all = sessions ?? new List<SessionDef>();

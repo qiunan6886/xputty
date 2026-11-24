@@ -15,7 +15,7 @@ namespace XPutty
     /// </summary>
     public class MainForm : Form
     {
-        public const string AppVersion = "v1.0.1";
+        public const string AppVersion = "v1.0.2";
 
         // ---- panels (SHELL_SPEC §8 public contract) ------------------------
         public SessionSidebar Sidebar;
@@ -115,6 +115,50 @@ namespace XPutty
             _sidebarVisible = true;
             CreateControls();
             WireEvents();
+            Theme.Changed += OnThemeChanged;
+        }
+
+        // ==================================================================
+        // Theme switching (dark <-> light)
+        // ==================================================================
+
+        private void OnThemeChanged(object sender, EventArgs e)
+        {
+            if (IsDisposed || Disposing) return;
+            Diag.Log("theme changed to " + Theme.CurrentScheme);
+            BackColor = Theme.Bg0;
+            ApplyDwmEffects();
+            ApplyThemeToTree(this);
+            PerformLayoutCore();
+            Invalidate(true);
+
+            // Re-generate the terminal theme INI and push it to every live
+            // terminal so the pane colours switch together with the chrome.
+            string ini = AppContext.I.BuildThemeIni();
+            for (int t = 0; t < _tabs.Count; t++)
+            {
+                TermTab tab = _tabs[t];
+                if (tab == null || tab.Tree == null) continue;
+                var panes = tab.Tree.EnumeratePanes();
+                for (int i = 0; i < panes.Count; i++)
+                {
+                    PaneView p = panes[i];
+                    if (p != null && p.PuttyHwnd != IntPtr.Zero)
+                        PuttyMessages.ApplyTheme(p.PuttyHwnd, ini);
+                }
+            }
+        }
+
+        private static void ApplyThemeToTree(Control root)
+        {
+            if (root == null) return;
+            foreach (Control c in root.Controls)
+            {
+                var aware = c as Theme.IThemeAware;
+                if (aware != null) aware.ApplyThemeColors();
+                ApplyThemeToTree(c);
+                try { c.Invalidate(); } catch { }
+            }
         }
 
         private void CreateControls()
@@ -318,9 +362,9 @@ namespace XPutty
         {
             try
             {
-                int on = 1;
-                DwmSetWindowAttribute(Handle, 20, ref on, sizeof(int)); // immersive dark mode
-                DwmSetWindowAttribute(Handle, 19, ref on, sizeof(int)); // older attribute id
+                int dark = Theme.IsLight ? 0 : 1;
+                DwmSetWindowAttribute(Handle, 20, ref dark, sizeof(int)); // immersive dark mode
+                DwmSetWindowAttribute(Handle, 19, ref dark, sizeof(int)); // older attribute id
                 int corner = 2;                                          // DWMWCP_ROUND
                 DwmSetWindowAttribute(Handle, 33, ref corner, sizeof(int));
             }
@@ -961,6 +1005,7 @@ namespace XPutty
                 case 0x45: SplitActive(true); break;           // E
                 case 0x44: SplitActive(false); break;          // D
                 case 0x4D: OpenMacroEditor(); break;           // M
+                case 0xBC: OpenSettings(); break;              // Ctrl+, (settings)
                 case 0x09: NextTab(!shift); break;             // Tab
                 case 0x7A: MaximizeActivePane(); break;        // F11
                 case 0x4E: OpenSessionEditor(null); break;     // N
@@ -1110,13 +1155,20 @@ namespace XPutty
             {
                 if (form.ShowDialog(this) == DialogResult.OK && form.Accepted)
                 {
+                    string oldTheme = AppContext.I.Settings.Theme;
                     AppContext.I.Settings = draft;
                     _sidebarVisible = draft.ShowSidebar;
+                    if (!string.Equals(oldTheme ?? "dark", draft.Theme ?? "dark",
+                                       StringComparison.OrdinalIgnoreCase))
+                    {
+                        Theme.SetScheme(draft.Theme);
+                        ApplyDwmEffects();
+                    }
                     AppContext.I.BuildThemeIni();
                     PerformLayoutCore();
                     UpdateStatus();
                     AppContext.I.SaveAll();
-                    Invalidate();
+                    Invalidate(true);
                 }
             }
         }
@@ -1309,6 +1361,14 @@ namespace XPutty
                 {
                     layout = a.Substring(9);
                 }
+                else if (a == "--theme" && i + 1 < args.Length)
+                {
+                    ApplyThemeArg(args[++i]);
+                }
+                else if (a.StartsWith("--theme=", StringComparison.Ordinal))
+                {
+                    ApplyThemeArg(a.Substring(8));
+                }
             }
 
             if (sessions.Count == 0) return;
@@ -1331,6 +1391,17 @@ namespace XPutty
         private static void AddIfFound(List<SessionDef> list, SessionDef s)
         {
             if (s != null) list.Add(s);
+        }
+
+        /// <summary>Apply a colour scheme from --theme (also used by tests).</summary>
+        private void ApplyThemeArg(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return;
+            bool light = string.Equals(name, "light", StringComparison.OrdinalIgnoreCase);
+            AppContext.I.Settings.Theme = light ? "light" : "dark";
+            Theme.SetScheme(AppContext.I.Settings.Theme);
+            AppContext.I.BuildThemeIni();
+            ApplyDwmEffects();
         }
 
         private SessionDef FindSession(string nameOrId)
@@ -1717,6 +1788,7 @@ namespace XPutty
                     case Keys.Tab: NextTab(true); return true;
                     case Keys.N: OpenSessionEditor(null); return true;
                     case Keys.K: CommandPalette(); return true;
+                    case Keys.Oemcomma: OpenSettings(); return true;
                 }
             }
             return base.ProcessCmdKey(ref msg, keyData);

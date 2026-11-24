@@ -10,7 +10,7 @@ namespace XPutty
     /// selection, IME and clipboard all behave natively; the surrounding chrome
     /// (fill, 1px border, focus ring, left icon, right key cap) is self-drawn.
     /// </summary>
-    public class FlatInput : Control
+    public class FlatInput : Control, Theme.IThemeAware
     {
         private readonly TextBox _box;
         private bool _focused;
@@ -54,16 +54,25 @@ namespace XPutty
 
         public TextBox Inner { get { return _box; } }
 
+        public void ApplyThemeColors()
+        {
+            Diag.Log("FlatInput apply theme, field=" + UiKit.FieldBg + " handle=" + _box.IsHandleCreated);
+            BackColor = Color.Transparent;
+            _box.BackColor = UiKit.FieldBg;
+            _box.ForeColor = Theme.TextPrimary;
+            ApplyCueBanner();
+            Invalidate();
+        }
+
         public override string Text
         {
-            get { return _placeholderShown ? "" : _box.Text; }
+            get { return _box.Text; }
             set
             {
-                HidePlaceholder();
                 _internalChange = true;
                 _box.Text = value ?? "";
                 _internalChange = false;
-                ShowPlaceholderIfEmpty();
+                ApplyCueBanner();
             }
         }
 
@@ -73,45 +82,48 @@ namespace XPutty
             set
             {
                 _placeholder = value ?? "";
-                ShowPlaceholderIfEmpty();
+                ApplyCueBanner();
             }
         }
 
-        // ---- self-drawn placeholder (no EM_SETCUEBANNER dependency) ----
+        // ---- placeholder via the native cue banner -----------------------
+        // Drawing the placeholder as real TextBox text was fragile: setting
+        // Text on a focused TextBox selects it, which showed up as a black
+        // selection band in the light theme.  EM_SETCUEBANNER is native,
+        // renders grey and never pollutes the text value.
+        [System.Runtime.InteropServices.DllImport("user32.dll",
+            CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+        private static extern IntPtr SendMessage(IntPtr hWnd, int msg,
+                                                 IntPtr wParam, string lParam);
+
+        private const int EM_SETCUEBANNER = 0x1501;
+
+        private void ApplyCueBanner()
+        {
+            if (!IsHandleCreated || _box == null || !_box.IsHandleCreated) return;
+            if (Multiline) return;
+            try
+            {
+                SendMessage(_box.Handle, EM_SETCUEBANNER, (IntPtr)1, _placeholder ?? "");
+            }
+            catch { }
+        }
+
         private void BoxTextChanged(object sender, EventArgs e)
         {
             if (_internalChange) return;
-            if (!string.IsNullOrEmpty(_box.Text))
-            {
-                _placeholderShown = false;
-                _box.ForeColor = Theme.TextPrimary;
-            }
             OnTextChanged(EventArgs.Empty);
             Invalidate();
         }
 
         private void ShowPlaceholderIfEmpty()
         {
-            if (Multiline || _focused || _placeholderShown) return;
-            if (string.IsNullOrEmpty(_placeholder)) return;
-            if (!string.IsNullOrEmpty(_box.Text)) return;
-            _internalChange = true;
-            _placeholderShown = true;
-            _box.ForeColor = Theme.TextTertiary;
-            _box.Text = _placeholder;
-            _internalChange = false;
-            Invalidate();
+            ApplyCueBanner();
         }
 
         private void HidePlaceholder()
         {
-            if (!_placeholderShown) return;
-            _placeholderShown = false;
-            _internalChange = true;
-            _box.Text = "";
-            _internalChange = false;
-            _box.ForeColor = Theme.TextPrimary;
-            Invalidate();
+            ApplyCueBanner();
         }
 
         public bool ReadOnlyValue

@@ -2311,6 +2311,36 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message,
                 xputty_inject_text(wgs->term, cd->lpData, cd->cbData);
             return TRUE;
         }
+        /*
+         * xPuTTY: live theme switch.  The payload is a UTF-8 path to the
+         * theme INI written by the shell; re-apply it to the running session's
+         * Conf, recreate the fonts/palette and re-lay-out the terminal grid.
+         */
+        if (cd && cd->dwData == XPUTTY_COPYDATA_THEME) {
+            xputty_trace("copydata: live theme requested");
+            if (wgs && wgs->term && cd->lpData) {
+                xputty_load_theme(wgs->conf, (const char *)cd->lpData);
+                /* The Terminal keeps its own private copy of Conf, so push
+                 * the updated settings into it before repainting. */
+                term_reconfig(wgs->term, wgs->conf);
+                init_fonts(wgs, 0, 0);
+                init_palette(wgs);
+                term_notify_palette_changed(wgs->term);
+                reset_window(wgs, 0);
+                InvalidateRect(hwnd, NULL, TRUE);
+                term_update(wgs->term);
+                {
+                    char buf[128];
+                    sprintf(buf, "live theme: bg=%06lx fg=%06lx fw=%d fh=%d",
+                            (unsigned long)wgs->colours[2],
+                            (unsigned long)wgs->colours[0],
+                            wgs->font_width, wgs->font_height);
+                    xputty_trace(buf);
+                }
+                xputty_trace("copydata: live theme applied");
+            }
+            return TRUE;
+        }
         break;
       }
       case WM_CLOSE: {

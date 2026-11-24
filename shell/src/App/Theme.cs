@@ -68,54 +68,182 @@ namespace XPutty
             return f;
         }
 
-        // ---- colours ---------------------------------------------------
-        public static readonly Color Bg0 = FromHex("#0F1115");
-        public static readonly Color Bg1 = FromHex("#12151A");
-        public static readonly Color Bg2 = FromHex("#161A21");
-        public static readonly Color Bg3 = FromHex("#1C222B");
-        public static readonly Color TermBg = FromHex("#0B0D11");
-        public static readonly Color TermHeader = FromHex("#101419");
-        public static readonly Color SidebarBg = FromHex("#101319");
-        public static readonly Color StatusBg = FromHex("#0C0F14");
+        // ---- colour scheme --------------------------------------------
+        /// <summary>
+        /// One complete colour scheme.  Theme exposes the active scheme through
+        /// static properties, so all painting code can keep writing Theme.Bg0
+        /// etc. and still follow a runtime dark/light switch.
+        /// </summary>
+        public sealed class PaletteSet
+        {
+            public Color Bg0, Bg1, Bg2, Bg3, TermBg, TermHeader, SidebarBg, StatusBg;
+            public Color Border, BorderStrong, BorderSoft, PaneSplit, FocusLine;
+            public Color TextPrimary, TextSecondary, TextTertiary, TextDisabled, TextInverse;
+            public Color Accent, AccentHover, AccentPressed, AccentSoft;
+            public Color Success, Warning, Danger, Info, Teal, Purple;
+            public Color HoverTint, Scrim, CloseHover, HoverRow, ToggleOff;
+            public Color[] Ansi16;
+        }
 
-        public static readonly Color Border = FromHex("#232A34");
-        public static readonly Color BorderStrong = FromHex("#2E3742");
-        public static readonly Color BorderSoft = FromHex("#1B222B");
-        public static readonly Color PaneSplit = FromHex("#272F3A");
-        public static readonly Color FocusLine = FromHex("#3F7AD6");
+        /// <summary>Controls that cache colours on themselves implement this so a
+        /// theme switch can refresh them without recreating the window.</summary>
+        public interface IThemeAware
+        {
+            void ApplyThemeColors();
+        }
 
-        public static readonly Color TextPrimary = FromHex("#E4E8EF");
-        public static readonly Color TextSecondary = FromHex("#9BA5B4");
-        public static readonly Color TextTertiary = FromHex("#697384");
-        public static readonly Color TextDisabled = FromHex("#4A5464");
-        public static readonly Color TextInverse = FromHex("#0B0D11");
+        public static event EventHandler Changed;
 
-        public static readonly Color Accent = FromHex("#4C8DFF");
-        public static readonly Color AccentHover = FromHex("#6BA3FF");
-        public static readonly Color AccentPressed = FromHex("#3B78E0");
-        public static readonly Color AccentSoft = FromHex("#26374F");
+        public static bool IsLight { get { return ReferenceEquals(_palette, Light); } }
+        public static string CurrentScheme { get { return IsLight ? "light" : "dark"; } }
 
-        public static readonly Color Success = FromHex("#3DD68C");
-        public static readonly Color Warning = FromHex("#E8B339");
-        public static readonly Color Danger = FromHex("#F0564B");
-        public static readonly Color Info = FromHex("#5C9BFF");
-        public static readonly Color Teal = FromHex("#2DD4BF");
-        public static readonly Color Purple = FromHex("#B18CFF");
+        private static readonly PaletteSet Dark = CreateDark();
+        private static readonly PaletteSet Light = CreateLight();
+        private static PaletteSet _palette = Dark;
 
-        public static readonly Color HoverTint = Color.FromArgb(10, 255, 255, 255);
-        public static readonly Color Scrim = Color.FromArgb(158, 5, 7, 11);
-        public static readonly Color CloseHover = FromHex("#C42B1C");
+        /// <summary>Switch the active scheme ("dark" / "light") and notify the UI.</summary>
+        public static void SetScheme(string name)
+        {
+            PaletteSet p = string.Equals(name, "light", StringComparison.OrdinalIgnoreCase)
+                ? Light : Dark;
+            if (ReferenceEquals(p, _palette)) return;
+            _palette = p;
+            EventHandler h = Changed;
+            if (h != null) h(null, EventArgs.Empty);
+        }
+
+        private static PaletteSet CreateDark()
+        {
+            var p = new PaletteSet();
+            p.Bg0 = FromHex("#0F1115");
+            p.Bg1 = FromHex("#12151A");
+            p.Bg2 = FromHex("#161A21");
+            p.Bg3 = FromHex("#1C222B");
+            p.TermBg = FromHex("#0B0D11");
+            p.TermHeader = FromHex("#101419");
+            p.SidebarBg = FromHex("#101319");
+            p.StatusBg = FromHex("#0C0F14");
+            p.Border = FromHex("#232A34");
+            p.BorderStrong = FromHex("#2E3742");
+            p.BorderSoft = FromHex("#1B222B");
+            p.PaneSplit = FromHex("#272F3A");
+            p.FocusLine = FromHex("#3F7AD6");
+            p.TextPrimary = FromHex("#E4E8EF");
+            p.TextSecondary = FromHex("#9BA5B4");
+            p.TextTertiary = FromHex("#697384");
+            p.TextDisabled = FromHex("#4A5464");
+            p.TextInverse = FromHex("#0B0D11");
+            p.Accent = FromHex("#4C8DFF");
+            p.AccentHover = FromHex("#6BA3FF");
+            p.AccentPressed = FromHex("#3B78E0");
+            p.AccentSoft = FromHex("#26374F");
+            p.Success = FromHex("#3DD68C");
+            p.Warning = FromHex("#E8B339");
+            p.Danger = FromHex("#F0564B");
+            p.Info = FromHex("#5C9BFF");
+            p.Teal = FromHex("#2DD4BF");
+            p.Purple = FromHex("#B18CFF");
+            p.HoverTint = Color.FromArgb(10, 255, 255, 255);
+            p.Scrim = Color.FromArgb(158, 5, 7, 11);
+            p.CloseHover = FromHex("#C42B1C");
+            p.HoverRow = FromHex("#171D26");
+            p.ToggleOff = FromHex("#39424F");
+            p.Ansi16 = new[] {
+                FromHex("#1A1D23"), FromHex("#F07178"), FromHex("#3DD68C"), FromHex("#E8C547"),
+                FromHex("#5C9BFF"), FromHex("#C792EA"), FromHex("#4FD1C5"), FromHex("#C9D1D9"),
+                FromHex("#5F6A7B"), FromHex("#FF8A90"), FromHex("#6BEBA8"), FromHex("#F2D97A"),
+                FromHex("#8FB8FF"), FromHex("#D9B3FF"), FromHex("#7FE3DA"), FromHex("#EDF1F7"),
+            };
+            return p;
+        }
+
+        private static PaletteSet CreateLight()
+        {
+            var p = new PaletteSet();
+            p.Bg0 = FromHex("#F5F7FB");
+            p.Bg1 = FromHex("#EEF2F8");
+            p.Bg2 = FromHex("#E8EDF4");
+            p.Bg3 = FromHex("#DDE4EE");
+            p.TermBg = FromHex("#FBFCFE");
+            p.TermHeader = FromHex("#F1F4F9");
+            p.SidebarBg = FromHex("#F2F5FA");
+            p.StatusBg = FromHex("#EDF1F7");
+            p.Border = FromHex("#D6DDE8");
+            p.BorderStrong = FromHex("#C0CAD8");
+            p.BorderSoft = FromHex("#E3E8F0");
+            p.PaneSplit = FromHex("#D7DFE9");
+            p.FocusLine = FromHex("#3F7AD6");
+            p.TextPrimary = FromHex("#1E2633");
+            p.TextSecondary = FromHex("#55637A");
+            p.TextTertiary = FromHex("#8893A6");
+            p.TextDisabled = FromHex("#B4BDCB");
+            p.TextInverse = FromHex("#FFFFFF");
+            p.Accent = FromHex("#3B78E0");
+            p.AccentHover = FromHex("#5B93F0");
+            p.AccentPressed = FromHex("#2F63BF");
+            p.AccentSoft = FromHex("#DCE8FF");
+            p.Success = FromHex("#1E9E6A");
+            p.Warning = FromHex("#C08A16");
+            p.Danger = FromHex("#D64545");
+            p.Info = FromHex("#3B78E0");
+            p.Teal = FromHex("#169B8C");
+            p.Purple = FromHex("#7C5CD6");
+            p.HoverTint = Color.FromArgb(8, 0, 0, 0);
+            p.Scrim = Color.FromArgb(120, 18, 24, 34);
+            p.CloseHover = FromHex("#D64545");
+            p.HoverRow = FromHex("#E4EAF3");
+            p.ToggleOff = FromHex("#C4CEDC");
+            p.Ansi16 = new[] {
+                FromHex("#3B4453"), FromHex("#C53030"), FromHex("#1E7A4B"), FromHex("#9C6B00"),
+                FromHex("#2B6CB0"), FromHex("#8B3FA8"), FromHex("#0F7C82"), FromHex("#8A94A4"),
+                FromHex("#8794A6"), FromHex("#E05252"), FromHex("#2FA06A"), FromHex("#C99A2E"),
+                FromHex("#4C8DD6"), FromHex("#A566C7"), FromHex("#2AA7AD"), FromHex("#FFFFFF"),
+            };
+            return p;
+        }
+
+        public static Color Bg0 { get { return _palette.Bg0; } }
+        public static Color Bg1 { get { return _palette.Bg1; } }
+        public static Color Bg2 { get { return _palette.Bg2; } }
+        public static Color Bg3 { get { return _palette.Bg3; } }
+        public static Color TermBg { get { return _palette.TermBg; } }
+        public static Color TermHeader { get { return _palette.TermHeader; } }
+        public static Color SidebarBg { get { return _palette.SidebarBg; } }
+        public static Color StatusBg { get { return _palette.StatusBg; } }
+
+        public static Color Border { get { return _palette.Border; } }
+        public static Color BorderStrong { get { return _palette.BorderStrong; } }
+        public static Color BorderSoft { get { return _palette.BorderSoft; } }
+        public static Color PaneSplit { get { return _palette.PaneSplit; } }
+        public static Color FocusLine { get { return _palette.FocusLine; } }
+
+        public static Color TextPrimary { get { return _palette.TextPrimary; } }
+        public static Color TextSecondary { get { return _palette.TextSecondary; } }
+        public static Color TextTertiary { get { return _palette.TextTertiary; } }
+        public static Color TextDisabled { get { return _palette.TextDisabled; } }
+        public static Color TextInverse { get { return _palette.TextInverse; } }
+
+        public static Color Accent { get { return _palette.Accent; } }
+        public static Color AccentHover { get { return _palette.AccentHover; } }
+        public static Color AccentPressed { get { return _palette.AccentPressed; } }
+        public static Color AccentSoft { get { return _palette.AccentSoft; } }
+
+        public static Color Success { get { return _palette.Success; } }
+        public static Color Warning { get { return _palette.Warning; } }
+        public static Color Danger { get { return _palette.Danger; } }
+        public static Color Info { get { return _palette.Info; } }
+        public static Color Teal { get { return _palette.Teal; } }
+        public static Color Purple { get { return _palette.Purple; } }
+
+        public static Color HoverTint { get { return _palette.HoverTint; } }
+        public static Color Scrim { get { return _palette.Scrim; } }
+        public static Color CloseHover { get { return _palette.CloseHover; } }
         /// <summary>Hover background for list rows (sidebar sessions / dialog lists).</summary>
-        public static readonly Color HoverRow = FromHex("#171D26");
+        public static Color HoverRow { get { return _palette.HoverRow; } }
         /// <summary>Toggle switch "off" track colour.</summary>
-        public static readonly Color ToggleOff = FromHex("#39424F");
+        public static Color ToggleOff { get { return _palette.ToggleOff; } }
 
-        public static readonly Color[] Ansi16 = {
-            FromHex("#1A1D23"), FromHex("#F07178"), FromHex("#3DD68C"), FromHex("#E8C547"),
-            FromHex("#5C9BFF"), FromHex("#C792EA"), FromHex("#4FD1C5"), FromHex("#C9D1D9"),
-            FromHex("#5F6A7B"), FromHex("#FF8A90"), FromHex("#6BEBA8"), FromHex("#F2D97A"),
-            FromHex("#8FB8FF"), FromHex("#D9B3FF"), FromHex("#7FE3DA"), FromHex("#EDF1F7"),
-        };
+        public static Color[] Ansi16 { get { return _palette.Ansi16; } }
 
         public static Color FromHex(string hex)
         {

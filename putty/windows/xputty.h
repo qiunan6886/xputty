@@ -23,6 +23,7 @@
 /* Magic values accepted in the dwData field of a WM_COPYDATA message. */
 #define XPUTTY_COPYDATA_MAGIC 0x58505459u /* 'XPTY' - shell -> terminal input */
 #define XPUTTY_COPYDATA_FATAL 0x58505446u /* 'XPTF' - terminal -> shell error */
+#define XPUTTY_COPYDATA_THEME 0x58505454u /* 'XPTT' - shell -> live theme change */
 
 /* Flags in the 4-byte little-endian header of an injected payload. */
 #define XPUTTY_INPUT_APPEND_CR 0x00000001u
@@ -47,6 +48,8 @@ void xputty_trace_msg(unsigned int message, WPARAM wParam, LPARAM lParam);
 int xputty_cmdline_param(const char *arg, const char *nextarg,
                          int *skip_next);
 void xputty_apply_theme(Conf *conf);
+/* Apply a theme INI to an already-running session's Conf (colours, font). */
+void xputty_load_theme(Conf *conf, const char *path);
 
 bool xputty_embedded(void);
 HWND xputty_embed_parent(void);

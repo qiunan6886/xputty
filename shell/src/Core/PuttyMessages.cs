@@ -17,6 +17,8 @@ namespace XPutty
         public const int WM_COPYDATA = 0x004A;
         public const int WM_PARENTNOTIFY = 0x0210;
         public const uint XPUTTY_COPYDATA_MAGIC = 0x58505459u; // 'XPTY'
+        public const uint XPUTTY_COPYDATA_FATAL = 0x58505446u; // 'XPTF'
+        public const uint XPUTTY_COPYDATA_THEME = 0x58505454u; // 'XPTT'
         public const int IDM_RESTART = 0x0040;
         public const uint SMTO_ABORTIFHUNG = 0x0002;
 
@@ -88,6 +90,41 @@ namespace XPutty
                 {
                     dwData = new IntPtr(unchecked((int)XPUTTY_COPYDATA_MAGIC)),
                     cbData = len,
+                    lpData = buf
+                };
+                IntPtr result;
+                IntPtr r = SendMessageTimeout(child, WM_COPYDATA, IntPtr.Zero,
+                                              ref cds, SMTO_ABORTIFHUNG, 3000,
+                                              out result);
+                return r != IntPtr.Zero;
+            }
+            catch
+            {
+                return false;
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(buf);
+            }
+        }
+
+        /// <summary>
+        /// Ask a running terminal to re-read the theme INI and repaint itself
+        /// (live dark/light switch; new sessions also read it at startup).
+        /// </summary>
+        public static bool ApplyTheme(IntPtr child, string themeIniPath)
+        {
+            if (child == IntPtr.Zero || string.IsNullOrEmpty(themeIniPath))
+                return false;
+            byte[] utf8 = Encoding.UTF8.GetBytes(themeIniPath + "\0");
+            IntPtr buf = Marshal.AllocHGlobal(utf8.Length);
+            try
+            {
+                Marshal.Copy(utf8, 0, buf, utf8.Length);
+                var cds = new COPYDATASTRUCT
+                {
+                    dwData = new IntPtr(unchecked((int)XPUTTY_COPYDATA_THEME)),
+                    cbData = utf8.Length,
                     lpData = buf
                 };
                 IntPtr result;

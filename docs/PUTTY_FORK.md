@@ -16,8 +16,9 @@ xPuTTY 外壳与终端进程之间的胶水层：
 | 消息 `xPuTTYCreated` | `PostMessage(host, wParam=terminal HWND)`，外壳据此绑定窗格 |
 | 消息 `xPuTTYSessionExit` | 会话结束/窗口关闭时通知外壳（wParam=退出码） |
 | 消息 `xPuTTYHotkey` | 把 Ctrl+Shift+T/W/E/D/M、Ctrl+Tab、F11、Ctrl+Shift+1..9 转发给外壳并吞掉按键 |
-| 消息 `xPuTTYFatal` | 嵌入模式下把 `modalfatalbox`/`nonfatal` 的错误文本同步发给外壳，不弹系统 MessageBox |
+| 消息 `xPuTTYFatal` | 嵌入模式下把 `modalfatalbox`/`nonfatal`/`connection_fatal` 的错误文本发给外壳（实际通过 `WM_COPYDATA` magic `'XPTF'` 传输，跨进程安全），不弹系统 MessageBox |
 | `WM_COPYDATA`（magic `'XPTY'`） | 外壳注入宏文本：`4 字节 flags + UTF-8`，按“逐字符键入”方式送入终端（新增行归一为 CR） |
+| `WM_COPYDATA`（magic `'XPTT'`） | 外壳实时切换深浅主题：payload 为 UTF-8 主题 INI 路径；终端重新解析 INI 后 `term_reconfig()` 推送新配置、`init_fonts()`/`init_palette()` 重建字体与调色板并重排网格，已运行会话立即换色 |
 | `clear_full_screen` 嵌入模式直接返回 | 否则 `WM_SIZE` 会把标题栏/边框加回子窗口 |
 | `WM_CLOSE` / 退出路径 | 嵌入模式不再弹“确认关闭”，直接销毁并通知外壳 |
 | 上下文菜单 | 嵌入模式删除 New/Duplicate Session、Saved Sessions、Change Settings、Full Screen 等会产生额外顶层窗口的菜单项 |

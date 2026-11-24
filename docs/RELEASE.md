@@ -1,15 +1,16 @@
-# xPuTTY v1.0.1 — 交付说明（Release Notes）
+# xPuTTY v1.0.2 — 交付说明（Release Notes）
 
 ## 版本历史
 
-- **v1.0.1（2026-11-24）**：修复关闭标签页时的 `ObjectDisposedException` 崩溃（SplitHost 对已释放 PaneView 重排 / 关闭顺序不当）。关闭单个标签、关闭分屏窗格、关闭最后一个标签、关闭主窗口均已回归验证，无异常、无残留 putty 进程。MSI 版本号同步升至 1.0.1。
+- **v1.0.2（2026-11-24）**：新增**浅色主题**（设置 → 主题 → 浅色，保存后主界面/侧栏/标签/宏条/弹窗即时换肤，已打开终端通过 WM_COPYDATA 热更新配色，新会话自动使用浅色终端色板）；修复设置弹窗中浅色选项被禁用导致的「浅色主题不生效」；搜索框占位符改用系统 cue banner（修复浅色下黑底）；标题栏版本号同步 v1.0.2。
+- v1.0.1（2026-11-24）：修复关闭标签页时的 `ObjectDisposedException` 崩溃（SplitHost 对已释放 PaneView 重排 / 关闭顺序不当）；关闭单个标签、关闭分屏窗格、关闭最后标签、关闭主窗口均回归通过，无异常、无残留 putty 进程。
 - v1.0.0（2026-11-24）：首个完整版本。
 
 ## 交付物
 
 | 文件 | 说明 |
 | --- | --- |
-| `dist/xPuTTY-1.0.1-x64.msi` | Windows x64 安装包（per-machine，Program Files） |
+| `dist/xPuTTY-1.0.2-x64.msi` | Windows x64 安装包（per-machine，Program Files） |
 | `dist/SHA256SUMS.txt` | stage 全文件 + MSI 的 SHA256 清单 |
 | `dist/BUILD-INFO.txt` | 构建信息：源码指纹、工具链版本、耗时、版本号 |
 | `README.md` | 项目说明 / 功能 / 构建 / 安装 |
@@ -19,21 +20,21 @@
 | `ARCHITECTURE.md` / `SHELL_SPEC.md` | 架构与外壳开发规范 |
 | `design/` | UI 设计稿（PNG/HTML）、设计 token、参考分析 |
 
-MSI：**2,805,760 字节**
-SHA256：**`28DAF8AD74AC2EECDF7C0DFAB291137933E0B61865ECA748B1020063022CF589`**
-构建：`build-all.ps1 -Fresh -Verify`（exit 0，70.9s，验证 38/38 PASS）
+MSI：**2,809,856 字节**
+SHA256：**`4F39DD179480D47558544D2C970E2C188760A4B30EA51915028418AEE52E01E0`**
+构建：`build-all.ps1 -SkipPutty -Version 1.0.2 -Verify`（exit 0；本机 11/11 检查通过，per-user 生命周期在干净环境为 38/38）
 
 ## 安装 / 卸载
 
 ```powershell
 # 安装（需要管理员；也可双击 MSI）
-msiexec /i "D:\workspace\xputty\dist\xPuTTY-1.0.1-x64.msi"
+msiexec /i "D:\workspace\xputty\dist\xPuTTY-1.0.2-x64.msi"
 
 # 静默安装
-msiexec /i "D:\workspace\xputty\dist\xPuTTY-1.0.1-x64.msi" /qn
+msiexec /i "D:\workspace\xputty\dist\xPuTTY-1.0.2-x64.msi" /qn
 
 # 卸载
-msiexec /x "D:\workspace\xputty\dist\xPuTTY-1.0.1-x64.msi" /qn
+msiexec /x "D:\workspace\xputty\dist\xPuTTY-1.0.2-x64.msi" /qn
 ```
 
 - 安装位置：`%ProgramFiles%\xPuTTY\`（xputty.exe、putty.exe、plink/pscp/psftp/puttygen/pageant、themes、许可文件）
@@ -50,6 +51,7 @@ msiexec /x "D:\workspace\xputty\dist\xPuTTY-1.0.1-x64.msi" /qn
 - 终端：完整 PuTTY 0.85 内核（SSH 密钥、Pageant、串口、复制粘贴、滚轮、256 色、窗口自适应），深色主题与外壳一致
 - 断开检测：Pane 内显示错误原文遮罩 + 一键重连，无系统级报错弹窗
 - 无边框自绘界面、Win11 圆角/深色/贴靠布局、200% DPI 支持
+- **深色 / 浅色主题**：设置 → 主题切换，保存后主界面、侧栏、标签栏、宏条、状态栏与弹窗即时换肤；已打开的终端会话通过 WM_COPYDATA 热更新字体/配色（`XPTT` 消息），新会话自动读取当前主题
 - .NET Framework 4.8（Win10/11 内置），无额外运行时依赖
 
 ## 验证摘要

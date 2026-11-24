@@ -34,7 +34,7 @@
 | --- | --- |
 | 无边框窗口：拖动 / 双击最大化 / Win11 Snap | ✅ |
 | 标签：新建（Ctrl+Shift+T）、关闭、Ctrl+Tab 切换 | ✅ |
-| **关闭标签页回归（v1.0.1 修复）**：单标签/多标签/分屏内关闭窗格/关闭最后一个标签/中键关闭 | ✅ | 修复前抛 `ObjectDisposedException`（SplitHost.Relayout 对已释放 PaneView 调用 SetVisible）；修复后无异常日志、其余标签会话不受影响、无残留 putty 进程 |
+| **关闭标签页回归（v1.0.2 修复）**：单标签/多标签/分屏内关闭窗格/关闭最后一个标签/中键关闭 | ✅ | 修复前抛 `ObjectDisposedException`（SplitHost.Relayout 对已释放 PaneView 调用 SetVisible）；修复后无异常日志、其余标签会话不受影响、无残留 putty 进程 |
 | 分屏：Ctrl+Shift+E 左右、Ctrl+Shift+D 上下、2x2 四窗格 | ✅ |
 | 分屏拖拽分隔条、F11 窗格最大化 | ✅ |
 | 宏工具条：8 个默认宏、横向滚动、点击发送 | ✅ |
@@ -43,6 +43,10 @@
 | 会话编辑弹窗（SSH/Telnet/串口/Raw、命令行预览） | ✅ |
 | 从 PuTTY 注册表导入会话 | ✅ |
 | 设置弹窗（字体/字号/侧栏/宏条/关闭行为） | ✅ |
+| **浅色主题（v1.0.2）**：设置 → 主题 → 浅色 → 保存 | ✅ | 主界面/侧栏/标签/宏条/状态栏/弹窗即时切换；`%APPDATA%\xPuTTY\settings.json` 持久化，重启保持 |
+| **浅色主题下的终端配色热更新** | ✅ | 运行中会话收到 `XPTT` WM_COPYDATA 后重新加载主题 INI（`term_reconfig` + 字体/调色板重建），终端背景/ANSI 色即时变浅；新会话启动直接使用浅色 INI |
+| 浅色主题下宏管理/会话编辑/设置弹窗、搜索框占位符 | ✅ | cue banner 占位符无黑底、弹窗对比度正常 |
+| 深色主题回归（切换回深色） | ✅ | 深浅互切后布局/颜色无残留 |
 | 200% DPI 布局 | ✅ | 设计像素 × 2 缩放，字号/间距一致 |
 | 窗口几何保存/恢复 | ✅ |
 
@@ -51,8 +55,8 @@
 | 项 | 结果 |
 | --- | --- |
 | 构建 | `build-all.ps1 -Fresh -Verify` → exit 0，70.9 s |
-| 产物 | `dist\xPuTTY-1.0.1-x64.msi`，2,805,760 B |
-| SHA256 | `28DAF8AD74AC2EECDF7C0DFAB291137933E0B61865ECA748B1020063022CF589` |
+| 产物 | `dist\xPuTTY-1.0.2-x64.msi`，2,805,760 B |
+| SHA256 | `4F39DD179480D47558544D2C970E2C188760A4B30EA51915028418AEE52E01E0` |
 | MSI 内容 | xputty.exe(571,392) / putty.exe(1,082,880) / plink / pscp / psftp / puttygen / pageant / LICENCE / README-PuTTY / themes\default.ini / xputty.ico |
 | `/a` 管理安装解包 | exit 0；11 个 payload SHA256 与 stage 清单全部一致 |
 | per-user 安装/卸载自测 | 38/38 PASS（文件、开始菜单 3 快捷方式、桌面快捷方式、卸载清理） |

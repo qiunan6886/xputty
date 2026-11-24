@@ -11,6 +11,7 @@ Windows 10/11 专用的 SSH / 串口终端管理器：**基于 PuTTY 0.85 源码
 **实际运行截图**（Windows 11 / 200% DPI）：
 
 ![主界面](docs/screenshots/01-main-single.png)
+![浅色主题](docs/screenshots/11-light-main.png)
 ![2x2 四窗格](docs/screenshots/02-quad-pane.png)
 ![宏管理](docs/screenshots/06-macro-manager.png)
 ![断开重连](docs/screenshots/05-disconnect-overlay.png)
@@ -24,7 +25,8 @@ Windows 10/11 专用的 SSH / 串口终端管理器：**基于 PuTTY 0.85 源码
 - 宏系统：任意数量宏按钮、宏管理弹窗、快捷键、颜色标签、自动回车、`$HOST/$USER/$PORT` 变量
 - 会话管理：分组/搜索/新建 SSH·Telnet·串口·Raw 会话/编辑/删除、从 PuTTY 导入现有会话
 - 终端：完整 PuTTY 内核（SSH 密钥、Pageant、串口、复制粘贴、滚轮、256 色、窗口缩放）
-- 深色主题，终端配色与外壳一致；断开显示遮罩并可一键重连
+- 深色 / 浅色主题：设置里一键切换，界面与已打开终端同步换肤；终端配色与外壳一致
+- 断开显示遮罩并可一键重连
 - 仅 Windows x64；.NET Framework 4.8（Win10/11 自带），无额外运行时依赖
 
 ## 目录结构
@@ -49,7 +51,7 @@ Windows 10/11 专用的 SSH / 串口终端管理器：**基于 PuTTY 0.85 源码
 powershell -ExecutionPolicy Bypass -File .\build-all.ps1
 
 # 产物
-dist\xPuTTY-1.0.1-x64.msi
+dist\xPuTTY-1.0.2-x64.msi
 ```
 
 单步：
@@ -61,7 +63,7 @@ powershell -ExecutionPolicy Bypass -File .\shell\build-shell.ps1
 
 ## 安装 / 卸载
 
-- 双击 `dist\xPuTTY-1.0.1-x64.msi` 安装（需要管理员确认，安装到 `%ProgramFiles%\xPuTTY`）。
+- 双击 `dist\xPuTTY-1.0.2-x64.msi` 安装（需要管理员确认，安装到 `%ProgramFiles%\xPuTTY`）。
 - 卸载：设置 → 应用 → 已安装的应用 → xPuTTY。
 - 用户数据保存在 `%APPDATA%\xPuTTY`（会话/宏/设置，卸载时保留）。
 - 安装包**未做代码签名**，首次运行 SmartScreen 可能提示"更多信息 → 仍要运行"。

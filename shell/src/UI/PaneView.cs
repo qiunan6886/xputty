@@ -11,7 +11,7 @@ namespace XPutty
     /// A single terminal pane: 26px self-drawn pane header, an embedded
     /// putty.exe child window and a disconnect/reconnect overlay.
     /// </summary>
-    public class PaneView : Control
+    public class PaneView : Control, Theme.IThemeAware
     {
         private const int WM_PARENTNOTIFY = 0x0210;
         private const int WM_LBUTTONDOWN = 0x0201;
@@ -395,6 +395,13 @@ namespace XPutty
         }
 
         /// <summary>Close this pane; the owner disposes the control.</summary>
+        public void ApplyThemeColors()
+        {
+            BackColor = Theme.TermBg;
+            if (EmbedPanel != null) EmbedPanel.BackColor = Theme.TermBg;
+            Invalidate(true);
+        }
+
         public void Close()
         {
             if (_closed) return;
@@ -765,7 +772,7 @@ namespace XPutty
         }
 
         /// <summary>Semi-transparent "disconnected" overlay with reconnect/close.</summary>
-        private sealed class OverlayPanel : Control
+        private sealed class OverlayPanel : Control, Theme.IThemeAware
         {
             public PaneView Owner;
             private string _title = "连接已断开";
@@ -792,11 +799,22 @@ namespace XPutty
                 Invalidate();
             }
 
+            public void ApplyThemeColors()
+            {
+                BackColor = Theme.TermBg;
+                Invalidate();
+            }
+
             protected override void OnPaint(PaintEventArgs e)
             {
                 Graphics g = e.Graphics;
                 g.SmoothingMode = SmoothingMode.AntiAlias;
-                using (var b = new SolidBrush(Color.FromArgb(216, 5, 7, 11)))
+                // Nearly-opaque wash that hides the stale terminal content and
+                // keeps the message readable in both colour schemes.
+                Color scrim = Theme.IsLight
+                    ? Color.FromArgb(216, 250, 251, 253)
+                    : Color.FromArgb(216, 5, 7, 11);
+                using (var b = new SolidBrush(scrim))
                     g.FillRectangle(b, ClientRectangle);
 
                 int midX = Width / 2;

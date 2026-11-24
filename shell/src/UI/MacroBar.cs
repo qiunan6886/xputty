@@ -11,7 +11,7 @@ namespace XPutty
     /// scrolls horizontally with the wheel or the pager buttons), a dashed
     /// "+ 配置宏" button at the end, and a right-side macro-manager entry.
     /// </summary>
-    public class MacroBar : Control
+    public class MacroBar : Control, Theme.IThemeAware
     {
         private const int BtnH = 28;
         private const int StartX = 52;
@@ -38,6 +38,12 @@ namespace XPutty
             BackColor = Theme.Bg1;
             Size = new Size(Theme.S(1000), Theme.S(44));
             Font = UiKit.UI(12f);
+        }
+
+        public void ApplyThemeColors()
+        {
+            BackColor = Theme.Bg1;
+            Invalidate();
         }
 
         // ---- public API (SHELL_SPEC §8) --------------------------------

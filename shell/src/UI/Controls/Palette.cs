@@ -16,29 +16,29 @@ namespace XPutty
     /// </summary>
     public static class UiKit
     {
-        // ---- surfaces (derived from tokens) ---------------------------
-        public static readonly Color DialogBg = Theme.Blend(Theme.Bg1, Theme.Bg2, 0.65f);
-        public static readonly Color ListBg = Theme.Blend(Theme.Bg1, Theme.Bg3, 0.22f);
-        public static readonly Color FooterBg = ListBg;
-        public static readonly Color FieldBg = Theme.Blend(Theme.TermBg, Theme.Bg2, 0.22f);
-        public static readonly Color InputBg = Theme.Blend(Theme.TermBg, Theme.SidebarBg, 0.5f);
-        public static readonly Color CardBg = Theme.Blend(Theme.Bg1, Theme.Bg3, 0.4f);
-        public static readonly Color CardBorder = Theme.Border;
-        public static readonly Color HoverRow = Theme.Blend(Theme.SidebarBg, Theme.Bg3, 0.55f);
-        public static readonly Color SelectRow = Theme.Blend(Theme.Bg2, Theme.AccentSoft, 0.35f);
-        public static readonly Color SelectBorder = Theme.Blend(Theme.AccentSoft, Theme.Accent, 0.12f);
-        public static readonly Color ItemSelBg = Theme.Blend(Theme.Bg3, Theme.AccentSoft, 0.25f);
-        public static readonly Color ItemSelBorder = Theme.Blend(Theme.AccentSoft, Theme.Accent, 0.1f);
-        public static readonly Color DashedBorder = Theme.Blend(Theme.Border, Theme.Accent, 0.2f);
-        public static readonly Color DashedText = Theme.Blend(Theme.Accent, Color.White, 0.35f);
-        public static readonly Color KeyCapBorder = Theme.Blend(Theme.Border, Theme.TextSecondary, 0.25f);
-        public static readonly Color InputBorderColor = Theme.Blend(Theme.Border, Theme.TextTertiary, 0.15f);
-        public static readonly Color ToggleOff = Theme.Blend(Theme.Bg3, Theme.TextTertiary, 0.35f);
-        public static readonly Color HeaderDivider = Theme.Border;
-        public static readonly Color MacroBtnBg = Theme.Bg2;
-        public static readonly Color MacroBtnBorder = Theme.Border;
-        public static readonly Color MacroBtnHover = Theme.Blend(Theme.Bg2, Theme.Bg3, 0.85f);
-        public static readonly Color MacroBtnHoverBorder = Theme.Blend(Theme.Border, Theme.TextSecondary, 0.2f);
+        // ---- surfaces (derived from the active Theme tokens at paint time) ----
+        public static Color DialogBg { get { return Theme.Blend(Theme.Bg1, Theme.Bg2, 0.65f); } }
+        public static Color ListBg { get { return Theme.Blend(Theme.Bg1, Theme.Bg3, 0.22f); } }
+        public static Color FooterBg { get { return ListBg; } }
+        public static Color FieldBg { get { return Theme.Blend(Theme.TermBg, Theme.Bg2, 0.22f); } }
+        public static Color InputBg { get { return Theme.Blend(Theme.TermBg, Theme.SidebarBg, 0.5f); } }
+        public static Color CardBg { get { return Theme.Blend(Theme.Bg1, Theme.Bg3, 0.4f); } }
+        public static Color CardBorder { get { return Theme.Border; } }
+        public static Color HoverRow { get { return Theme.Blend(Theme.SidebarBg, Theme.Bg3, 0.55f); } }
+        public static Color SelectRow { get { return Theme.Blend(Theme.Bg2, Theme.AccentSoft, 0.35f); } }
+        public static Color SelectBorder { get { return Theme.Blend(Theme.AccentSoft, Theme.Accent, 0.12f); } }
+        public static Color ItemSelBg { get { return Theme.Blend(Theme.Bg3, Theme.AccentSoft, 0.25f); } }
+        public static Color ItemSelBorder { get { return Theme.Blend(Theme.AccentSoft, Theme.Accent, 0.1f); } }
+        public static Color DashedBorder { get { return Theme.Blend(Theme.Border, Theme.Accent, 0.2f); } }
+        public static Color DashedText { get { return Theme.Blend(Theme.Accent, Theme.IsLight ? Color.Black : Color.White, 0.35f); } }
+        public static Color KeyCapBorder { get { return Theme.Blend(Theme.Border, Theme.TextSecondary, 0.25f); } }
+        public static Color InputBorderColor { get { return Theme.Blend(Theme.Border, Theme.TextTertiary, 0.15f); } }
+        public static Color ToggleOff { get { return Theme.Blend(Theme.Bg3, Theme.TextTertiary, 0.35f); } }
+        public static Color HeaderDivider { get { return Theme.Border; } }
+        public static Color MacroBtnBg { get { return Theme.Bg2; } }
+        public static Color MacroBtnBorder { get { return Theme.Border; } }
+        public static Color MacroBtnHover { get { return Theme.Blend(Theme.Bg2, Theme.Bg3, 0.85f); } }
+        public static Color MacroBtnHoverBorder { get { return Theme.Blend(Theme.Border, Theme.TextSecondary, 0.2f); } }
 
         public static Color TagColor(string name)
         {

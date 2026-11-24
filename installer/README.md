@@ -1,4 +1,4 @@
-# xPuTTY 1.0.1 安装包（WiX 3.14.1 / MSI）
+# xPuTTY 1.0.2 安装包（WiX 3.14.1 / MSI）
 
 本目录包含 xPuTTY 最终安装包的定义与构建/验证脚本。
 
@@ -37,7 +37,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File D:\workspace\xputty\build-al
 产物：
 
 ```
-D:\workspace\xputty\dist\xPuTTY-1.0.1-x64.msi     # 最终安装包
+D:\workspace\xputty\dist\xPuTTY-1.0.2-x64.msi     # 最终安装包
 D:\workspace\xputty\dist\SHA256SUMS.txt           # stage 文件 + MSI 的 SHA256
 D:\workspace\xputty\dist\BUILD-INFO.txt           # 版本/提交/哈希/耗时
 D:\workspace\xputty\build\stage\                  # MSI 的输入 staging 目录
@@ -55,12 +55,12 @@ D:\workspace\xputty\build\stage\                  # MSI 的输入 staging 目录
 任一条件命中时，默认**直接报错退出**（exit 1），不会生成可发布的 MSI。
 只有在显式传 `-AllowPlaceholder` 时才继续，并且：
 
-- MSI 命名为 `xPuTTY-1.0.1-x64-PLACEHOLDER.msi`；
+- MSI 命名为 `xPuTTY-1.0.2-x64-PLACEHOLDER.msi`；
 - `dist\PLACEHOLDER-BUILD-WARNING.txt` 写明“不可发布”；
 - 控制台输出 `[PLACEHOLDER - NOT FOR RELEASE]`。
 
 外壳就绪后重新执行（不带 `-AllowPlaceholder`），即生成正常的
-`dist\xPuTTY-1.0.1-x64.msi`。
+`dist\xPuTTY-1.0.2-x64.msi`。
 
 ---
 
@@ -69,8 +69,8 @@ D:\workspace\xputty\build\stage\                  # MSI 的输入 staging 目录
 最终包为 **per-machine**（安装到 `C:\Program Files\xPuTTY`），需要管理员权限。
 
 ```
-双击 dist\xPuTTY-1.0.1-x64.msi      # 图形向导（WixUI_InstallDir，可改安装目录）
-msiexec /i "D:\workspace\xputty\dist\xPuTTY-1.0.1-x64.msi" /qn    # 静默（管理员命令行）
+双击 dist\xPuTTY-1.0.2-x64.msi      # 图形向导（WixUI_InstallDir，可改安装目录）
+msiexec /i "D:\workspace\xputty\dist\xPuTTY-1.0.2-x64.msi" /qn    # 静默（管理员命令行）
 ```
 
 安装内容：
@@ -87,7 +87,7 @@ C:\Program Files\xPuTTY\
 桌面：xPuTTY 快捷方式（默认创建）
 ```
 
-产品信息：`ProductName=xPuTTY`、`Manufacturer=xPuTTY`、`Version=1.0.1`、
+产品信息：`ProductName=xPuTTY`、`Manufacturer=xPuTTY`、`Version=1.0.2`、
 固定 `UpgradeCode={7F3B9C1A-2E84-4D5B-9A67-C0B1E5D4F2A3}`、`ARPPRODUCTICON` 使用
 `shell\assets\xputty.ico`（9 帧 16–256px 32bpp ICO）。
 
@@ -101,7 +101,7 @@ C:\Program Files\xPuTTY\
 
 ```
 设置 → 应用 → 已安装的应用 → xPuTTY → 卸载
-msiexec /x "D:\workspace\xputty\dist\xPuTTY-1.0.1-x64.msi" /qn     # 静默
+msiexec /x "D:\workspace\xputty\dist\xPuTTY-1.0.2-x64.msi" /qn     # 静默
 ```
 
 卸载会删除安装目录、开始菜单文件夹、桌面快捷方式和安装器注册的 HKCU/HKLM 组件键。
@@ -117,7 +117,7 @@ msiexec /x "D:\workspace\xputty\dist\xPuTTY-1.0.1-x64.msi" /qn     # 静默
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File D:\workspace\xputty\installer\verify-msi.ps1 `
-    -MsiPath D:\workspace\xputty\dist\xPuTTY-1.0.1-x64.msi `
+    -MsiPath D:\workspace\xputty\dist\xPuTTY-1.0.2-x64.msi `
     -StageDir D:\workspace\xputty\build\stage `
     -InstallerDir D:\workspace\xputty\installer
 ```
@@ -131,7 +131,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File D:\workspace\xputty\installe
 | C. 真实 per-machine 安装 | 需要管理员；非提权会话记录 `Error 1925`（预期） | 见下方限制 |
 
 安装包本体（per-machine）的静默安装请用管理员命令行执行：
-`msiexec /i dist\xPuTTY-1.0.1-x64.msi /qn`。
+`msiexec /i dist\xPuTTY-1.0.2-x64.msi /qn`。
 
 ## 6. 已知限制
 
@@ -141,5 +141,5 @@ powershell -NoProfile -ExecutionPolicy Bypass -File D:\workspace\xputty\installe
 3. **仅 x64 Windows 10/11**（`Platform="x64"`，无 32 位包；无 ARM64 包）。
 4. 不写 PATH、不注册文件关联（按产品要求）。
 5. 外壳仍是开发中产物时，请不要分发 `*-PLACEHOLDER.msi`。
-6. 安装包版本固定为 `1.0.1`；正式发版前按需修改 `-Version` 与 `product.wxs` 的 ProductVersion。
+6. 安装包版本固定为 `1.0.2`；正式发版前按需修改 `-Version` 与 `product.wxs` 的 ProductVersion。
 7. 内置主题仅一份 `themes\default.ini`；运行期主题由外壳生成到用户数据目录，升级不会覆盖用户主题。

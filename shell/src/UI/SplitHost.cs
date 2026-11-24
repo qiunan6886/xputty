@@ -12,7 +12,7 @@ namespace XPutty
     /// double as the visual splitter line (the hit zone is inflated to 3px on
     /// each side and drags are forwarded here by PaneView).
     /// </summary>
-    public class SplitHost : Control
+    public class SplitHost : Control, Theme.IThemeAware
     {
         public SplitTree Tree;
         public PaneView ActivePane;
@@ -33,6 +33,12 @@ namespace XPutty
                      ControlStyles.OptimizedDoubleBuffer |
                      ControlStyles.ResizeRedraw, true);
             BackColor = Theme.PaneSplit;
+        }
+
+        public void ApplyThemeColors()
+        {
+            BackColor = Theme.PaneSplit;
+            Invalidate();
         }
 
         public List<SplitDivider> Dividers { get { return _dividers; } }

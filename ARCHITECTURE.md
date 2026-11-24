@@ -121,12 +121,12 @@ ansi15=#F2F4F8
 build.ps1
  ├─ [1] PuTTY fork:  vcvars64 + cmake -G Ninja + ninja    → build\putty\putty.exe
  ├─ [2] Shell:       Roslyn csc /target:winexe /r:.NET4.8  → build\shell\xputty.exe
- └─ [3] MSI:         WiX candle + light                    → dist\xPuTTY-1.0.1-x64.msi
+ └─ [3] MSI:         WiX candle + light                    → dist\xPuTTY-1.0.2-x64.msi
 ```
 
 - 编译器：VS2022 BuildTools（MSVC 14.44、Windows SDK 10.0.26100、自带 cmake/ninja、Roslyn csc），无需额外安装 .NET SDK。
 - MSI：WiX Toolset 3.14.1（`tools/wix/`），per-machine 安装、开始菜单快捷方式、可选桌面快捷方式、自动升级 GUID、卸载干净。
-- 版本号：`1.0.1`，卸载显示名「xPuTTY」，发布者自定。
+- 版本号：`1.0.2`，卸载显示名「xPuTTY」，发布者自定。
 
 ## 6. 测试要点
 

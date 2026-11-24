@@ -41,6 +41,9 @@ namespace XPutty
                 // Load persisted state and regenerate the terminal theme INI
                 // that patched putty.exe reads on startup.
                 AppContext.I.Load();
+                // Restore the saved colour scheme BEFORE any control is created.
+                Theme.SetScheme(AppContext.I.Settings != null
+                                ? AppContext.I.Settings.Theme : "dark");
                 AppContext.I.BuildThemeIni();
 
                 // Panels read Theme.Scale from their constructors, so it must

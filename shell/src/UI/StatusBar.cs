@@ -9,7 +9,7 @@ namespace XPutty
     /// 26px status bar: connection state + session on the left, terminal
     /// capabilities in the centre and latency / crypto / theme on the right.
     /// </summary>
-    public class StatusBar : Control
+    public class StatusBar : Control, Theme.IThemeAware
     {
         private bool _connected;
         private bool _error;
@@ -30,6 +30,12 @@ namespace XPutty
                      ControlStyles.ResizeRedraw, true);
             BackColor = Theme.StatusBg;
             Height = Theme.S(26);
+        }
+
+        public void ApplyThemeColors()
+        {
+            BackColor = Theme.StatusBg;
+            Invalidate();
         }
 
         public PaneView Pane { get { return _pane; } }

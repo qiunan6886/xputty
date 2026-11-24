@@ -62,10 +62,10 @@ namespace XPutty
             const int L = 18, RW = 584;
 
             Caption("主题", Theme.S(L), Theme.S(14));
-            HintRight("浅色主题将在后续版本提供", Theme.S(L + RW), Theme.S(14), Theme.S(220));
+            HintRight("深色 / 浅色即时生效（终端配色同步）", Theme.S(L + RW), Theme.S(14), Theme.S(260));
             _theme = new SegmentedControl();
             _theme.Options = new[] { "深色", "浅色" };
-            _theme.SetOptionEnabled(1, false);
+            _theme.SetOptionEnabled(1, true);
             _theme.SetBounds(Theme.S(L), Theme.S(31), Theme.S(280), Theme.S(32));
             Body.Controls.Add(_theme);
 
@@ -127,7 +127,7 @@ namespace XPutty
                 Theme.BorderSoft, Math.Max(1f, Theme.SF(1f)));
             UiKit.Icon(g, "info", new Rectangle(r.X + Theme.S(12), r.Y + Theme.S(10), Theme.S(12), Theme.S(12)),
                 Theme.TextTertiary);
-            string l1 = "xPuTTY v1.0.1 · 基于 PuTTY 0.85 内核 · 主题 " + (_theme.SelectedIndex == 0 ? "深色" : "浅色");
+            string l1 = "xPuTTY v1.0.2 · 基于 PuTTY 0.85 内核 · 主题 " + (_theme.SelectedIndex == 0 ? "深色" : "浅色");
             string l2 = "数据目录 " + AppContext.I.DataDir + " · 字体 " + _font.SelectedText + " " + _fontSize.SelectedText + "px";
             UiKit.Text(g, l1, UiKit.UI(10.5f), Theme.TextSecondary,
                 new Rectangle(r.X + Theme.S(32), r.Y + Theme.S(4), r.Width - Theme.S(44), Theme.S(15)), UiKit.L);
@@ -175,6 +175,9 @@ namespace XPutty
             }
             Accepted = true;
             DialogResult = DialogResult.OK;
+            // Apply the colour scheme immediately as well: this also covers
+            // callers that only persist the returned settings.
+            Theme.SetScheme(_s.Theme);
             Close();
         }
     }

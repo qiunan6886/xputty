@@ -22,7 +22,7 @@ namespace XPutty
     /// close buttons, drag re-ordering, middle-click close, new-tab button and
     /// the split / layout / more button group on the right.
     /// </summary>
-    public class TabBar : Control
+    public class TabBar : Control, Theme.IThemeAware
     {
         private const int TabHeight = 32;
         private const int TabMaxWidth = 210;
@@ -79,6 +79,12 @@ namespace XPutty
                      ControlStyles.ResizeRedraw, true);
             BackColor = Theme.Bg1;
             Height = Theme.S(38);
+        }
+
+        public void ApplyThemeColors()
+        {
+            BackColor = Theme.Bg1;
+            Invalidate();
         }
 
         public List<TabInfo> Tabs { get { return _tabs; } }
